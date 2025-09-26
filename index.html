@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Virtual Lab - Berpikir Komputasional TPB ITB</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+            <div class="logo-icon">
+        <div class="logo-icon">
+    <div class="logo-text">
+    <h1>VIRTUAL LAB</h1>
+    <p>by Kenzie R</p>
+</div>
+ 
+</div>
+    </div>
+</div>
+            <nav>
+                <ul>
+                    <li><button onclick="showPage('home')" class="nav-btn active" data-page="home">Beranda</button></li>
+                    <li><button onclick="showPage('material')" class="nav-btn" data-page="material">Materi</button></li>
+                    <li><button onclick="showPage('practice')" class="nav-btn" data-page="practice">Latihan</button></li>
+                    <li><button onclick="showPage('drag-drop')" class="nav-btn" data-page="drag-drop">Drag&Drop</button></li>
+                    <li><button onclick="showPage('canvas-viz')" class="nav-btn" data-page="canvas-viz">Visualisasi</button></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="page active">
+            <div class="hero-section">
+                <h1>Selamat Datang di Virtual Lab Berpikir Komputasional</h1>
+                <p class="hero-description">Platform pembelajaran interaktif untuk mahasiswa TPB Institut Teknologi Bandung. Mulai perjalanan Anda dalam dunia pemrograman Python dengan cara yang menyenangkan dan interaktif.</p>
+                
+                <button id="start-learning" class="cta-button" onclick="showPage('material')">
+                    Mulai Belajar Sekarang
+                </button>
+            </div>
+
+            <div class="features-section">
+                <div class="feature-row">
+                    <div class="feature-number">01</div>
+                    <div class="feature-content">
+                        <h3>Materi Lengkap</h3>
+                        <p>5 bab pembelajaran dari dasar hingga mahir, dengan penjelasan konsep yang mudah dipahami dan contoh praktis untuk setiap topik pembelajaran.</p>
+                    </div>
+                </div>
+                
+                <div class="feature-row">
+                    <div class="feature-number">02</div>
+                    <div class="feature-content">
+                        <h3>Editor Kode Interaktif</h3>
+                        <p>Tulis dan jalankan kode Python langsung di browser tanpa instalasi apapun. Lihat hasil secara real-time dengan feedback instan.</p>
+                    </div>
+                </div>
+                
+                <div class="feature-row">
+                    <div class="feature-number">03</div>
+                    <div class="feature-content">
+                        <h3>Latihan Terintegrasi</h3>
+                        <p>Soal-soal praktik yang disesuaikan dengan materi perkuliahan, lengkap dengan sistem penilaian otomatis dan panduan step-by-step.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="curriculum-section">
+                <h2>Kurikulum Pembelajaran</h2>
+                <div class="curriculum-timeline">
+                    <div class="curriculum-item">
+                        <div class="curriculum-marker">1</div>
+                        <div class="curriculum-content">
+                            <h4>Fondasi Pemrograman</h4>
+                            <p>Variabel, tipe data, input/output</p>
+                        </div>
+                    </div>
+                    <div class="curriculum-item">
+                        <div class="curriculum-marker">2</div>
+                        <div class="curriculum-content">
+                            <h4>Kontrol Alur</h4>
+                            <p>Percabangan dan perulangan</p>
+                        </div>
+                    </div>
+                    <div class="curriculum-item">
+                        <div class="curriculum-marker">3</div>
+                        <div class="curriculum-content">
+                            <h4>Kumpulan Data</h4>
+                            <p>String dan list manipulation</p>
+                        </div>
+                    </div>
+                    <div class="curriculum-item">
+                        <div class="curriculum-marker">4</div>
+                        <div class="curriculum-content">
+                            <h4>Struktur Lanjutan</h4>
+                            <p>List 2D dan nested loops</p>
+                        </div>
+                    </div>
+                    <div class="curriculum-item">
+                        <div class="curriculum-marker">5</div>
+                        <div class="curriculum-content">
+                            <h4>Fungsi</h4>
+                            <p>Kode modular dan reusable</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="material" class="page">
+            <h1 class="page-title">Materi Pembelajaran</h1>
+            
+            <div class="chapter-list">
+
+                <article id="bab1" class="chapter-item">
+                    <div class="chapter-header">
+                        <div class="chapter-number">BAB 1</div>
+                        <div class="chapter-title-group">
+                            <h2>Fondasi Pemrograman Python</h2>
+                            <button class="video-button" onclick="playVideo(1)">Tonton Video</button>
+                        </div>
+                    </div>
+                    <div class="chapter-body">
+                        <div class="learning-objectives">
+                            <h3>Tujuan Pembelajaran</h3>
+                            <ul>
+                                <li><strong>Konseptual:</strong> Mahasiswa memahami alur kerja dasar sebuah program komputer yang terdiri dari Input → Proses → Output.</li>
+                                <li><strong>Praktis:</strong> Mahasiswa mampu menulis dan menjalankan program Python sederhana serta memahami bagaimana data diproses di dalam komputer.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="material-content">
+                            <h3>Materi Perkuliahan</h3>
+                            
+                            <h4>1. Konsep Inti: Variabel dan Tipe Data</h4>
+                            <ul>
+                                <li><strong>Variabel</strong> adalah wadah untuk menyimpan data. Analogi: variabel seperti sebuah kotak berlabel yang berisi nilai tertentu.</li>
+                                <li><strong>Dynamic Typing di Python:</strong> Tidak perlu mendeklarasikan tipe data secara eksplisit, Python otomatis menentukannya saat program berjalan.</li>
+                                <li><strong>Konvensi Penamaan:</strong> Menggunakan format snake_case (huruf kecil dengan garis bawah sebagai pemisah), misalnya <code>nama_mahasiswa</code>.</li>
+                            </ul>
+                            
+                            <h4>A. Jenis Tipe Data Dasar dalam Python:</h4>
+                            <ul>
+                                <li>Integer (int): Bilangan bulat (positif, negatif, atau nol)</li>
+                                <li>Floating Point (float): Bilangan pecahan atau desimal</li>
+                                <li>String (str): Teks yang ditulis dengan tanda kutip</li>
+                                <li>Boolean (bool): Nilai logika dengan dua kemungkinan: benar (True) atau salah (False)</li>
+                            </ul>
+                            
+                            <h4>B. Kesalahan umum:</h4>
+                            <ul>
+                                <li>Mengakses variabel yang belum didefinisikan (menyebabkan error)</li>
+                                <li>Salah penulisan nama variabel karena Python membedakan huruf besar dan kecil (case-sensitive)</li>
+                            </ul>
+                            
+                            <h4>2. Interaksi Program: Input, Output, dan Konversi Tipe Data</h4>
+                            <ul>
+                                <li>Program harus bisa berkomunikasi dengan pengguna</li>
+                                <li><strong>Input:</strong> Perintah untuk menerima data dari pengguna</li>
+                                <li><strong>Output:</strong> Perintah untuk menampilkan hasil</li>
+                                <li>Semua data dari input awalnya berupa teks (string). Oleh karena itu, sering kali diperlukan konversi tipe data (casting) untuk mengubah string menjadi angka</li>
+                                <li>Output dapat diformat agar lebih jelas, misalnya dengan memisahkan beberapa nilai atau menambahkan teks penjelas</li>
+                            </ul>
+                            
+                            <h4>3. Operator Aritmatika dan Aturan Prioritas</h4>
+                            <ul>
+                                <li>Operator adalah simbol untuk melakukan operasi matematika seperti penjumlahan, pengurangan, perkalian, dan pembagian</li>
+                                <li><strong>Prioritas operasi (presedensi):</strong> Aturan yang menentukan urutan eksekusi operasi. Misalnya, operasi dalam tanda kurung dieksekusi lebih dahulu, kemudian pangkat, lalu perkalian/pembagian, baru penjumlahan/pengurangan</li>
+                                <li><strong>Catatan penting:</strong> di Python, pembagian biasa selalu menghasilkan bilangan desimal, meskipun hasilnya bulat</li>
+                            </ul>
+                        </div>
+                    </div>
+                </article>
+
+                <article id="bab2" class="chapter-item">
+                    <div class="chapter-header">
+                        <div class="chapter-number">BAB 2</div>
+                        <div class="chapter-title-group">
+                            <h2>Mengontrol Alur Program</h2>
+                            <button class="video-button" onclick="playVideo(2)">Tonton Video</button>
+                        </div>
+                    </div>
+                    <div class="chapter-body">
+                        <div class="learning-objectives">
+                            <h3>Tujuan Pembelajaran</h3>
+                            <ul>
+                                <li><strong>Konseptual:</strong> Mahasiswa memahami bagaimana alur eksekusi program dapat dikontrol agar tidak berjalan lurus saja, melainkan dapat bercabang atau berulang.</li>
+                                <li><strong>Praktis:</strong> Mahasiswa mampu menerapkan percabangan dan perulangan untuk menyelesaikan permasalahan logika sederhana.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="material-content">
+                            <h3>Materi Perkuliahan</h3>
+                            
+                            <h4>1. Percabangan (if-elif-else)</h4>
+                            <ul>
+                                <li><strong>Alur keputusan:</strong> Program sering kali harus memilih jalur berdasarkan kondisi tertentu. Misalnya, jika nilai ujian ≥ 85, maka hasilnya "A".</li>
+                                <li><strong>Indentasi:</strong> Python menggunakan indentasi (spasi menjorok ke dalam) untuk menandai blok kode. Kesalahan indentasi akan membuat program tidak dapat dijalankan.</li>
+                                <li><strong>Truthy dan Falsy:</strong> Selain True dan False, Python juga menafsirkan nilai lain sebagai kondisi benar atau salah. Contoh: angka 0, string kosong, atau list kosong dianggap salah (False).</li>
+                            </ul>
+
+                            <h4>2. Perulangan (Looping)</h4>
+                            <ul>
+                                <li><strong>While Loop:</strong> Digunakan ketika jumlah pengulangan belum diketahui. Perulangan berlangsung selama kondisi tertentu masih benar.</li>
+                                <li><strong>For Loop:</strong> Digunakan untuk mengulang berdasarkan data yang sudah jelas jumlahnya.</li>
+                                <li><strong>Break:</strong> Menghentikan perulangan sepenuhnya.</li>
+                                <li><strong>Continue:</strong> Melewati satu iterasi lalu melanjutkan ke iterasi berikutnya.</li>
+                            </ul>
+
+                            <h4>3. Kesalahan Umum</h4>
+                            <ul>
+                                <li>Tidak memperbarui variabel kondisi dalam while loop sehingga menimbulkan loop tak berujung.</li>
+                                <li>Salah memahami fungsi range(), karena range(n) menghasilkan urutan dari 0 sampai n-1, bukan sampai n.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </article>
+
+                <article id="bab3" class="chapter-item">
+                    <div class="chapter-header">
+                        <div class="chapter-number">BAB 3</div>
+                        <div class="chapter-title-group">
+                            <h2>Bekerja dengan Kumpulan Data</h2>
+                            <button class="video-button" onclick="playVideo(3)">Tonton Video</button>
+                        </div>
+                    </div>
+                    <div class="chapter-body">
+                        <div class="learning-objectives">
+                            <h3>Tujuan Pembelajaran</h3>
+                            <ul>
+                                <li><strong>Konseptual:</strong> Mahasiswa memahami perbedaan antara tipe data yang bisa diubah (mutable) dan yang tidak bisa diubah (immutable).</li>
+                                <li><strong>Praktis:</strong> Mahasiswa mampu menyimpan, mengakses, dan memanipulasi data dalam jumlah banyak menggunakan string dan list.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="material-content">
+                            <h3>Materi Perkuliahan</h3>
+                            
+                            <h4>1. String sebagai Sekuens Data</h4>
+                            <ul>
+                                <li>String adalah kumpulan karakter yang bersifat immutable. Artinya, setelah string dibuat, isinya tidak dapat diubah.</li>
+                                <li>Operasi seperti mengubah huruf menjadi kapital atau menghapus spasi hanya menghasilkan string baru, bukan memodifikasi string asli.</li>
+                                <li>String memiliki banyak metode bawaan, seperti mengubah ke huruf besar, menghapus spasi di awal/akhir, mengganti kata tertentu, atau memisahkan string menjadi daftar kata.</li>
+                            </ul>
+
+                            <h4>2. List sebagai Koleksi Dinamis</h4>
+                            <ul>
+                                <li>List adalah kumpulan elemen yang bersifat mutable, artinya bisa ditambah, dihapus, atau diubah.</li>
+                                <li>List digunakan untuk menyimpan data dalam jumlah banyak yang dapat berubah-ubah.</li>
+                                <li>Python menyediakan metode bawaan untuk list, misalnya menambah elemen, menghapus, menghitung jumlah elemen, dan mengurutkan.</li>
+                                <li>Penting untuk memahami bahwa beberapa metode list langsung mengubah data asli dan tidak mengembalikan nilai baru.</li>
+                            </ul>
+
+                            <h4>3. Kesalahan Umum</h4>
+                            <ul>
+                                <li>Menggunakan metode string pada list, atau sebaliknya.</li>
+                                <li>Mengira metode sort() menghasilkan list baru, padahal sebenarnya mengubah list yang sudah ada.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </article>
+
+                <article id="bab4" class="chapter-item">
+                    <div class="chapter-header">
+                        <div class="chapter-number">BAB 4</div>
+                        <div class="chapter-title-group">
+                            <h2>Struktur Data Lanjutan dan Pola Perulangan</h2>
+                            <button class="video-button" onclick="playVideo(4)">Tonton Video</button>
+                        </div>
+                    </div>
+                    <div class="chapter-body">
+                        <div class="learning-objectives">
+                            <h3>Tujuan Pembelajaran</h3>
+                            <ul>
+                                <li><strong>Konseptual:</strong> Mahasiswa memahami bagaimana data dua dimensi dapat direpresentasikan dalam bentuk baris dan kolom.</li>
+                                <li><strong>Praktis:</strong> Mahasiswa mampu membuat dan mengolah list 2D dengan menggunakan perulangan bersarang.</li>
+                            </ul>
+                        </div>
+
+                        <div class="material-content">
+                            <h3>Materi Perkuliahan</h3>
+                            
+                            <h4>1. Perulangan Bersarang</h4>
+                            <ul>
+                                <li>Perulangan bersarang adalah perulangan di dalam perulangan.</li>
+                                <li>Analogi: seperti jam, di mana jarum panjang (menit) bergerak penuh setiap kali jarum pendek (jam) bergeser satu langkah. Dengan kata lain, loop dalam harus menyelesaikan seluruh iterasinya untuk setiap satu iterasi loop luar.</li>
+                                <li>Nested loop umum digunakan untuk memproses data berbentuk tabel atau grid.</li>
+                            </ul>
+
+                            <h4>2. List Dua Dimensi (Matriks)</h4>
+                            <ul>
+                                <li>List 2D adalah list yang berisi list lain.</li>
+                                <li>Data diakses menggunakan indeks ganda: indeks baris dan indeks kolom.</li>
+                                <li>Matriks memungkinkan penyimpanan data dalam bentuk tabel, misalnya skor pertandingan atau papan permainan.</li>
+                            </ul>
+
+                            <h4>3. Kesalahan Umum</h4>
+                            <ul>
+                                <li>Mengakses indeks yang tidak ada (IndexError).</li>
+                                <li>Membalik urutan indeks baris dan kolom.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </article>
+
+                <article id="bab5" class="chapter-item">
+                    <div class="chapter-header">
+                        <div class="chapter-number">BAB 5</div>
+                        <div class="chapter-title-group">
+                            <h2>Membuat Kode Modular dengan Fungsi</h2>
+                            <button class="video-button" onclick="playVideo(5)">Tonton Video</button>
+                        </div>
+                    </div>
+                    <div class="chapter-body">
+                        <div class="learning-objectives">
+                            <h3>Tujuan Pembelajaran</h3>
+                            <ul>
+                                <li><strong>Konseptual:</strong> Mahasiswa memahami konsep abstraksi dan dekomposisi masalah dengan membagi program besar menjadi bagian-bagian kecil.</li>
+                                <li><strong>Praktis:</strong> Mahasiswa mampu membuat fungsi yang rapi, efisien, serta dapat digunakan kembali.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="material-content">
+                            <h3>Materi Perkuliahan</h3>
+                            
+                            <h4>1. Abstraksi dan Dekomposisi</h4>
+                            <ul>
+                                <li>Dekomposisi: Memecah masalah besar menjadi sub-masalah kecil yang lebih mudah dikelola.</li>   
+                                <li>Abstraksi: Menyembunyikan detail implementasi dan hanya menampilkan cara penggunaan. Misalnya, saat menggunakan fungsi bawaan seperti print(), kita tidak perlu tahu cara kerjanya, cukup tahu hasil yang diberikan.</li>
+                                <li>Fungsi dapat diberi dokumentasi (docstring) untuk menjelaskan tujuan, parameter, dan hasil keluaran.</li>
+                            </ul>
+
+                            <h4>2. Parameter, Argumen, dan Nilai Kembali (Return)</h4>
+                            <ul>
+                                <li>Fungsi dapat menerima data melalui parameter.</li>
+                                <li>Argumen dapat diberikan berdasarkan urutan (positional) atau berdasarkan nama (keyword).</li>
+                                <li>Parameter juga dapat memiliki nilai default sehingga opsional saat fungsi dipanggil.</li>
+                                <li>Fungsi bisa mengembalikan hasil dengan return, yang dapat digunakan dalam perhitungan lebih lanjut.</li>
+                            </ul>
+
+                            <h4>3. Variabel Lokal dan Global (Scope)</h4>
+                            <ul>
+                                <li>Variabel lokal: Dibuat di dalam fungsi dan hanya dapat diakses di fungsi tersebut.</li>
+                                <li>Variabel global: Dibuat di luar fungsi dan dapat diakses di mana saja.</li>
+                                <li>Sebaiknya hindari mengubah variabel global dari dalam fungsi, karena dapat membingungkan alur program.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="practice" class="page">
+            <h1 class="page-title">Latihan Praktik</h1>
+            
+            <div id="chapter-selection" class="chapter-selection">
+                <div class="selection-intro">
+                    <h2>Pilih Bab Untuk Berlatih</h2>
+                    <p>Setiap bab memiliki 5 soal latihan yang dapat Anda kerjakan dengan editor kode interaktif</p>
+                </div>
+                
+                <div class="chapter-menu">
+                    <button class="chapter-option" onclick="showChapterProblems(1)">
+                        <div class="option-number">01</div>
+                        <div class="option-details">
+                            <h3>Fondasi Pemrograman</h3>
+                            <p>Input, tipe data, operasi dasar</p>
+                            <span class="problem-indicator">5 Soal Tersedia</span>
+                        </div>
+                    </button>
+                    
+                    <button class="chapter-option" onclick="showChapterProblems(2)">
+                        <div class="option-number">02</div>
+                        <div class="option-details">
+                            <h3>Kontrol Alur Program</h3>
+                            <p>Percabangan dan perulangan</p>
+                            <span class="problem-indicator">5 Soal Tersedia</span>
+                        </div>
+                    </button>
+                    
+                    <button class="chapter-option" onclick="showChapterProblems(3)">
+                        <div class="option-number">03</div>
+                        <div class="option-details">
+                            <h3>Kumpulan Data</h3>
+                            <p>String dan list manipulation</p>
+                            <span class="problem-indicator">5 Soal Tersedia</span>
+                        </div>
+                    </button>
+                    
+                    <button class="chapter-option" onclick="showChapterProblems(4)">
+                        <div class="option-number">04</div>
+                        <div class="option-details">
+                            <h3>Struktur Data Lanjutan</h3>
+                            <p>List 2D dan nested loops</p>
+                            <span class="problem-indicator">5 Soal Tersedia</span>
+                        </div>
+                    </button>
+                    
+                    <button class="chapter-option" onclick="showChapterProblems(5)">
+                        <div class="option-number">05</div>
+                        <div class="option-details">
+                            <h3>Fungsi</h3>
+                            <p>Kode modular dan reusable</p>
+                            <span class="problem-indicator">5 Soal Tersedia</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div id="problems-container" class="problems-workspace" style="display: none;">
+                <div class="workspace-header">
+                    <button class="back-button" onclick="backToChapterSelection()">← Kembali ke Pilihan Bab</button>
+                    <h2 id="current-chapter-title"></h2>
+                </div>
+                
+                <div id="dynamic-problems">
+                </div>
+            </div>
+        </section>
+        <section id="drag-drop" class="page">
+            <h1 class="page-title">Latihan Drag & Drop - Susun Kode</h1>
+            
+            <div class="drag-intro">
+                <p>Susun blok kode berikut menjadi program yang benar dengan cara drag & drop!</p>
+            </div>
+
+            <div class="drag-container">
+                <div class="drag-zone" id="code-blocks">
+                    <h3>Blok Kode Tersedia</h3>
+                    <div class="code-block" draggable="true" data-id="1">
+                        <code>def hitung_rata(nilai):</code>
+                    </div>
+                    <div class="code-block" draggable="true" data-id="2">
+                        <code>    total = sum(nilai)</code>
+                    </div>
+                    <div class="code-block" draggable="true" data-id="3">
+                        <code>    return total / len(nilai)</code>
+                    </div>
+                    <div class="code-block" draggable="true" data-id="4">
+                        <code>nilai_siswa = [80, 90, 75, 85]</code>
+                    </div>
+                    <div class="code-block" draggable="true" data-id="5">
+                        <code>print(f"Rata-rata: {hitung_rata(nilai_siswa)}")</code>
+                    </div>
+                </div>
+
+                <div class="drag-zone drop-zone" id="solution-area">
+                    <h3>Area Solusi (Drag di sini)</h3>
+                    <p class="empty-message">Drag blok kode ke sini untuk menyusun program</p>
+                </div>
+            </div>
+
+            <div class="drag-controls">
+                <button onclick="checkDragSolution()" class="check-button">Periksa Jawaban</button>
+                <button onclick="resetDragExercise()" class="reset-button">Reset</button>
+            </div>
+
+            <div id="drag-feedback" class="feedback-area"></div>
+        </section>
+        <section id="canvas-viz" class="page">
+            <h1 class="page-title">Visualisasi Algoritma Sorting</h1>
+            
+            <div class="canvas-intro">
+                <p>Lihat bagaimana algoritma sorting bekerja secara visual! Pilih algoritma dan tekan "Mulai Sorting" untuk melihat animasinya.</p>
+            </div>
+
+            <div class="canvas-controls">
+                <button onclick="generateRandomArray()" class="canvas-btn">Generate Array Baru</button>
+                <select id="sortAlgorithm" class="canvas-select">
+                    <option value="bubble">Bubble Sort</option>
+                    <option value="selection">Selection Sort</option>
+                    <option value="insertion">Insertion Sort</option>
+                </select>
+                <button onclick="startSorting()" class="canvas-btn primary">Mulai Sorting</button>
+                <button onclick="resetCanvas()" class="canvas-btn">Reset</button>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="sortCanvas" width="800" height="400"></canvas>
+            </div>
+
+            <div class="canvas-info">
+                <div class="info-item">
+                    <span class="info-label">Status:</span>
+                    <span id="sortStatus">Siap</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Perbandingan:</span>
+                    <span id="comparisons">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Swap:</span>
+                    <span id="swaps">0</span>
+                </div>
+            </div>
+
+            <div class="algorithm-explanation">
+                <h3>Penjelasan Algoritma</h3>
+                <div id="algoExplanation">
+                    <p><strong>Bubble Sort:</strong> Membandingkan elemen bersebelahan dan menukarnya jika urutannya salah. Proses ini diulang hingga tidak ada lagi pertukaran.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
