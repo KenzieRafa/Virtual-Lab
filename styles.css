@@ -1054,22 +1054,38 @@ main {
     }
 }
 @media (max-width: 768px) {
+  header {
+    width: 100%;
+    overflow-x: auto; /* header bisa discroll */
+  }
+
+  .header-content {
+    width: max-content; /* biar melebar sesuai isi menu */
+    display: flex;
+    align-items: center;
+  }
+
+  nav {
+    flex: 1;
+    overflow-x: auto; 
+  }
+
   nav ul {
     display: flex;
-    flex-wrap: nowrap;            /* jangan pecah baris */
-    overflow-x: auto;             /* aktifkan scroll horizontal */
-    -webkit-overflow-scrolling: touch; /* biar smooth di HP */
-    scrollbar-width: none;        /* hilangkan scrollbar di Firefox */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* sembunyikan scrollbar di Firefox */
   }
 
   nav ul::-webkit-scrollbar {
-    display: none;                /* hilangkan scrollbar di Chrome/Safari */
+    display: none; /* sembunyikan scrollbar di Chrome/Safari */
   }
 
   nav button {
-    flex: 0 0 auto;               /* cegah tombol mengecil */
-    padding: 0.5rem 1rem;         /* lebih ramping di mobile */
+    flex: 0 0 auto; /* cegah tombol mengecil */
+    padding: 0.5rem 1rem;
     font-size: 0.85rem;
   }
 }
-
