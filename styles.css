@@ -68,6 +68,9 @@ nav ul {
     list-style: none;
     display: flex;
     gap: 0;
+    overflow-x: auto;        
+    white-space: nowrap;     
+    -webkit-overflow-scrolling: touch; 
 }
 
 nav button {
