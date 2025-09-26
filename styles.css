@@ -1055,9 +1055,21 @@ main {
 }
 @media (max-width: 768px) {
   nav ul {
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-wrap: nowrap;            /* jangan pecah baris */
+    overflow-x: auto;             /* aktifkan scroll horizontal */
+    -webkit-overflow-scrolling: touch; /* biar smooth di HP */
+    scrollbar-width: none;        /* hilangkan scrollbar di Firefox */
+  }
+
+  nav ul::-webkit-scrollbar {
+    display: none;                /* hilangkan scrollbar di Chrome/Safari */
+  }
+
+  nav button {
+    flex: 0 0 auto;               /* cegah tombol mengecil */
+    padding: 0.5rem 1rem;         /* lebih ramping di mobile */
+    font-size: 0.85rem;
   }
 }
 
