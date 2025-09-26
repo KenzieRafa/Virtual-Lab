@@ -1053,3 +1053,11 @@ main {
         gap: 1rem;
     }
 }
+@media (max-width: 768px) {
+  nav ul {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
