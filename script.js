@@ -287,7 +287,12 @@ function calculateTotalScore(chapterScores) {
 }
 
 async function saveChapterScore(chapterNum, problemNum, score) {
-    if (!isSupabaseEnabled || !currentUser) return;
+    if (!isSupabaseEnabled || !currentUser) {
+        console.warn('⚠️ Cannot save: Supabase not enabled or no user');
+        return;
+    }
+    
+    console.log(`📝 Attempting to save: Bab ${chapterNum} Soal ${problemNum} = ${score}`);
     
     try {
         const { data: progress, error: fetchError } = await supabaseClient
@@ -296,20 +301,34 @@ async function saveChapterScore(chapterNum, problemNum, score) {
             .eq('user_id', currentUser.id)
             .single();
         
-        if (fetchError) throw fetchError;
-        
-        let chapterScores = progress?.chapter_scores || {};
-        
-        if (!chapterScores[`bab${chapterNum}`]) {
-            chapterScores[`bab${chapterNum}`] = {};
+        if (fetchError) {
+            console.error('❌ Fetch error:', fetchError);
+            throw fetchError;
         }
         
-        const currentScore = chapterScores[`bab${chapterNum}`][`soal${problemNum}`] || 0;
+        let chapterScores = progress?.chapter_scores || {};
+        console.log('📊 Current chapter_scores from DB:', JSON.stringify(chapterScores));
+        
+        const babKey = `bab${chapterNum}`;
+        
+        // 🔧 FIX: Defensive initialization
+        if (!chapterScores[babKey] || typeof chapterScores[babKey] !== 'object') {
+            console.log(`🆕 Initializing ${babKey} as empty object`);
+            chapterScores[babKey] = {};
+        }
+        
+        // 🔧 FIX: Safe access to current score
+        const soalKey = `soal${problemNum}`;
+        const currentScore = chapterScores[babKey][soalKey] || 0;
+        
+        console.log(`📈 Current score for ${babKey} ${soalKey}: ${currentScore}, New score: ${score}`);
         
         if (score > currentScore) {
-            chapterScores[`bab${chapterNum}`][`soal${problemNum}`] = score;
+            chapterScores[babKey][soalKey] = score;
             
-            await supabaseClient
+            console.log('💾 Updating database with:', JSON.stringify(chapterScores));
+            
+            const { error: updateError } = await supabaseClient
                 .from('user_progress')
                 .update({ 
                     chapter_scores: chapterScores,
@@ -317,10 +336,18 @@ async function saveChapterScore(chapterNum, problemNum, score) {
                 })
                 .eq('user_id', currentUser.id);
             
-            console.log(`✅ Saved: Bab ${chapterNum} Soal ${problemNum} = ${score}`);
+            if (updateError) {
+                console.error('❌ Update error:', updateError);
+                throw updateError;
+            }
+            
+            console.log(`✅ SAVED: Bab ${chapterNum} Soal ${problemNum} = ${score}`);
+        } else {
+            console.log(`⏭️ SKIPPED: New score (${score}) not higher than current (${currentScore})`);
         }
     } catch (error) {
-        console.error('Error saving score:', error);
+        console.error('❌ Error saving score:', error);
+        alert(`Gagal menyimpan skor: ${error.message}`); // Tambahkan alert untuk user feedback
     }
 }
 
