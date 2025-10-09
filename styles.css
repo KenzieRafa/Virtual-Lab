@@ -1882,14 +1882,14 @@ nav button.active::before {
     display: none; /* Hidden di desktop */
     flex-direction: column;
     justify-content: space-between;
-    width: 30px;
-    height: 24px;
+    width: 25px;
+    height: 20px;
     background: transparent;
     border: none;
     cursor: pointer;
     padding: 0;
     z-index: 1001;
-    order: -1; /* ✅ Force hamburger ke paling kiri */
+    order: -3; /* ✅ Force hamburger ke paling kiri */
 }
 
 .hamburger-btn span {
