@@ -1971,7 +1971,7 @@ nav button.active::before {
 }
 
 /* ==================== MOBILE RESPONSIVE ==================== */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
     .header-content {
         padding: 1rem;
         gap: 1rem;
@@ -2086,7 +2086,7 @@ nav button.active::before {
 }
 
 /* ==================== TABLET (optional) ==================== */
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 768px) and (max-width: 1024px) {
     .header-content {
         gap: 1rem;
     }
