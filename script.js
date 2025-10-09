@@ -39,7 +39,36 @@ async function checkAuthState() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (session && session.user) {
             currentUser = session.user;
-            await loadUserProfile();
+            
+            // 🆕 Jika user baru dari Google OAuth, buat profile
+            const { data: existingProfile } = await supabaseClient
+                .from('user_profiles')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .single();
+            
+            if (!existingProfile) {
+                const displayName = currentUser.user_metadata?.full_name || 
+                                   currentUser.user_metadata?.name || 
+                                   currentUser.email.split('@')[0];
+                
+                await supabaseClient.from('user_profiles').insert([{
+                    user_id: currentUser.id,
+                    display_name: displayName
+                }]);
+                
+                await supabaseClient.from('user_progress').insert([{
+                    user_id: currentUser.id,
+                    completed_modules: [],
+                    chapter_scores: {},
+                    drag_drop_stats: { attempts: 0, correct: 0 }
+                }]);
+                
+                currentUser.displayName = displayName;
+            } else {
+                currentUser.displayName = existingProfile.display_name;
+            }
+            
             updateUIForAuthenticatedUser();
         } else {
             updateUIForGuestUser();
@@ -236,6 +265,30 @@ async function signUp() {
 }
     } catch (error) {
         showAuthMessage(error.message, 'error');
+    }
+}
+
+async function signInWithGoogle() {
+    if (!isSupabaseEnabled) {
+        alert('Fitur autentikasi belum dikonfigurasi.');
+        return;
+    }
+    
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+        
+        if (error) throw error;
+        
+        // User akan di-redirect ke Google OAuth
+        // Setelah berhasil, akan kembali ke aplikasi
+    } catch (error) {
+        console.error('Google Sign In error:', error);
+        showAuthMessage('Gagal sign in dengan Google: ' + error.message, 'error');
     }
 }
 
