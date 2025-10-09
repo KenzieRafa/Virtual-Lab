@@ -715,6 +715,11 @@ function showChapterProblems(chapterNum) {
     
     document.getElementById('current-chapter-title').textContent = chapterTitles[chapterNum];
     generateProblems(chapterNum);
+    
+    // ✅ LOAD SAVED SOLUTIONS
+    setTimeout(() => {
+        loadSavedSolutions(chapterNum);
+    }, 100);
 }
 
 function backToChapterSelection() {
@@ -908,6 +913,9 @@ function createProblemElement(problem, problemId, chapterNum) {
                 <span>Jalankan Kode</span>
             </button>
             <button class="reset-button" onclick="resetCode('${problemId}')">Reset</button>
+            <button class="save-button" onclick="saveProblemSolution(${chapterNum}, ${problemNum}, '${problemId}')">
+                💾 Save Answer
+            </button>
             <div class="score-badge" id="score-${problemId}">Skor: 0/100</div>
         </div>
     `;
@@ -971,11 +979,135 @@ async function runCode(problemId) {
             showMessage(output, 'success', 'Excellent! Kode Anda berjalan dengan baik!');
         }
         
-        // Save score to database with new structure
-        const [chapter, problem] = problemId.split('-').map(Number);
-        await saveChapterScore(chapter, problem, score); // ✅ Updated with problemNum
+        // ❌ HAPUS BARIS INI:
+        // await saveChapterScore(chapter, problem, score);
         
     }, 1500);
+}
+async function saveProblemSolution(chapterNum, problemNum, problemId) {
+    if (!currentUser) {
+        alert('Silakan Sign In terlebih dahulu untuk menyimpan jawaban!');
+        showAuthModal('signin');
+        return;
+    }
+    
+    // Ambil kode dan skor
+    const editor = document.getElementById(`editor-${problemId}`);
+    const scoreDisplay = document.getElementById(`score-${problemId}`);
+    const code = editor.value.trim();
+    
+    // Extract score from "Skor: 85/100" or "Tersimpan: 85/100"
+    const scoreText = scoreDisplay.textContent;
+    const scoreMatch = scoreText.match(/(\d+)\/100/);
+    const currentScore = scoreMatch ? parseInt(scoreMatch[1]) : 0;
+    
+    if (!code) {
+        alert('Tulis kode terlebih dahulu sebelum menyimpan!');
+        return;
+    }
+    
+    if (currentScore === 0) {
+        alert('Jalankan kode terlebih dahulu untuk mendapatkan skor!');
+        return;
+    }
+    
+    try {
+        // Get current progress
+        const { data: progress, error: fetchError } = await supabaseClient
+            .from('user_progress')
+            .select('chapter_scores')
+            .eq('user_id', currentUser.id)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        let chapterScores = progress?.chapter_scores || {};
+        
+        // Initialize chapter if doesn't exist
+        const babKey = `bab${chapterNum}`;
+        if (!chapterScores[babKey]) {
+            chapterScores[babKey] = {};
+        }
+        
+        const soalKey = `soal${problemNum}`;
+        const existingScore = chapterScores[babKey][soalKey] || 0;
+        
+        // Logika skor tertinggi
+        if (currentScore > existingScore) {
+            chapterScores[babKey][soalKey] = currentScore;
+            
+            // Hitung rata-rata semua soal di bab ini
+            const average = calculateChapterAverage(chapterScores[babKey]);
+            
+            // Update database
+            const { error: updateError } = await supabaseClient
+                .from('user_progress')
+                .update({ 
+                    chapter_scores: chapterScores,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('user_id', currentUser.id);
+            
+            if (updateError) throw updateError;
+            
+            // Update UI
+            scoreDisplay.textContent = `Tersimpan: ${currentScore}/100`;
+            scoreDisplay.style.background = 'linear-gradient(135deg, #22c55e, #4ade80)';
+            
+            alert(`✅ Skor tersimpan: ${currentScore}/100\n🏆 Skor tertinggi baru!\n📊 Rata-rata Bab ${chapterNum}: ${average}/100`);
+            
+        } else if (currentScore === existingScore) {
+            alert(`ℹ️ Skor Anda: ${currentScore}/100\n✅ Sudah tersimpan sebelumnya`);
+        } else {
+            alert(`ℹ️ Skor saat ini: ${currentScore}/100\n🏆 Skor tertinggi Anda: ${existingScore}/100\n\n⚠️ Skor tidak diupdate karena lebih rendah dari skor tertinggi.`);
+        }
+        
+    } catch (error) {
+        console.error('Error saving solution:', error);
+        alert('Gagal menyimpan jawaban: ' + error.message);
+    }
+}
+
+// Load saved scores when opening practice page
+async function loadSavedSolutions(chapterNum) {
+    if (!currentUser) return;
+    
+    try {
+        const { data: progress } = await supabaseClient
+            .from('user_progress')
+            .select('chapter_scores')
+            .eq('user_id', currentUser.id)
+            .single();
+        
+        const chapterScores = progress?.chapter_scores || {};
+        const babKey = `bab${chapterNum}`;
+        
+        if (chapterScores[babKey]) {
+            const babScores = chapterScores[babKey];
+            
+            // Update UI for each saved problem
+            Object.keys(babScores).forEach(soalKey => {
+                const problemNum = soalKey.replace('soal', '');
+                const problemId = `${chapterNum}-${problemNum}`;
+                const score = babScores[soalKey];
+                
+                // Update score badge
+                const scoreDisplay = document.getElementById(`score-${problemId}`);
+                if (scoreDisplay) {
+                    scoreDisplay.textContent = `Tersimpan: ${score}/100`;
+                    if (score >= 70) {
+                        scoreDisplay.style.background = 'linear-gradient(135deg, #22c55e, #4ade80)';
+                    } else if (score >= 40) {
+                        scoreDisplay.style.background = 'var(--text-muted)';
+                    } else {
+                        scoreDisplay.style.background = '#ef4444';
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error loading solutions:', error);
+    }
 }
 
 function simulatePythonExecution(code, problemId) {
