@@ -704,35 +704,39 @@ async function loadProfilePage() {
 }
 
 // ==================== NAVIGATION ====================
-function showPage(pageId) {
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(page => page.classList.remove('active'));
-    
-    const targetPage = document.getElementById(pageId);
-    if (targetPage) targetPage.classList.add('active');
-
-    const navButtons = document.querySelectorAll('.nav-btn');
-    navButtons.forEach(btn => btn.classList.remove('active'));
-    const selectedButton = document.querySelector(`[data-page="${pageId}"]`);
-    if (selectedButton) selectedButton.classList.add('active');
-    
-    if (pageId === 'practice') backToChapterSelection();
-    if (pageId === 'drag-drop') resetDragExercise();
-    if (pageId === 'leaderboard') loadLeaderboard();
-    else if (pageId === 'profile') loadProfilePage();
-    else if (pageId === 'material') loadUserProgress();
-}
-
 // ==================== MOBILE MENU TOGGLE ====================
 function toggleMobileMenu() {
     const nav = document.getElementById('mainNav');
     const hamburger = document.getElementById('hamburgerBtn');
+    const body = document.body;
     
     nav.classList.toggle('mobile-active');
     hamburger.classList.toggle('active');
+    
+    // Prevent body scroll when menu open
+    if (nav.classList.contains('mobile-active')) {
+        body.style.overflow = 'hidden';
+    } else {
+        body.style.overflow = '';
+    }
 }
 
-// Close menu ketika klik nav item
+// Close menu when clicking outside
+document.addEventListener('click', function(e) {
+    const nav = document.getElementById('mainNav');
+    const hamburger = document.getElementById('hamburgerBtn');
+    
+    if (nav && hamburger && 
+        nav.classList.contains('mobile-active') && 
+        !nav.contains(e.target) && 
+        !hamburger.contains(e.target)) {
+        nav.classList.remove('mobile-active');
+        hamburger.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+});
+
+// ==================== NAVIGATION ====================
 function showPage(pageId) {
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => page.classList.remove('active'));
@@ -748,9 +752,10 @@ function showPage(pageId) {
     // 🆕 Close mobile menu after navigation
     const nav = document.getElementById('mainNav');
     const hamburger = document.getElementById('hamburgerBtn');
-    if (nav.classList.contains('mobile-active')) {
+    if (nav && nav.classList.contains('mobile-active')) {
         nav.classList.remove('mobile-active');
         hamburger.classList.remove('active');
+        document.body.style.overflow = '';
     }
     
     if (pageId === 'practice') backToChapterSelection();
@@ -1520,39 +1525,48 @@ let comparisons = 0;
 let swaps = 0;
 let isSorting = false;
 
-// 🆕 Responsive Canvas Setup
+// 🆕 Setup Responsive Canvas
 function setupCanvas() {
     if (!canvas) return;
     
     const container = canvas.parentElement;
-    const containerWidth = container.clientWidth - 40; // padding
     const isMobile = window.innerWidth < 768;
     
-    canvas.width = isMobile ? containerWidth : Math.min(800, containerWidth);
-    canvas.height = isMobile ? 250 : 400;
+    if (isMobile) {
+        canvas.width = Math.min(container.clientWidth - 40, 400);
+        canvas.height = 250;
+    } else {
+        canvas.width = Math.min(container.clientWidth - 40, 800);
+        canvas.height = 400;
+    }
 }
 
 function generateRandomArray() {
     if (isSorting) return;
     
-    setupCanvas(); // 🆕 Setup responsive canvas
+    setupCanvas();
     
     array = [];
-    const arraySize = window.innerWidth < 480 ? 20 : 40; // Kurangi bar di mobile
+    const arraySize = window.innerWidth < 480 ? 20 : window.innerWidth < 768 ? 30 : 40;
+    const maxHeight = canvas.height - 50;
+    
     for (let i = 0; i < arraySize; i++) {
-        array.push(Math.floor(Math.random() * (canvas.height - 50)) + 20);
+        array.push(Math.floor(Math.random() * maxHeight) + 20);
     }
     
     comparisons = 0;
     swaps = 0;
     updateStats();
     drawArray();
-    document.getElementById('sortStatus').textContent = 'Siap';
+    if (document.getElementById('sortStatus')) {
+        document.getElementById('sortStatus').textContent = 'Siap';
+    }
 }
 
-// 🆕 Resize canvas saat window resize
+// Resize canvas on window resize
 window.addEventListener('resize', () => {
-    if (canvas && document.getElementById('canvas-viz').classList.contains('active')) {
+    if (canvas && document.getElementById('canvas-viz') && 
+        document.getElementById('canvas-viz').classList.contains('active')) {
         setupCanvas();
         drawArray();
     }
