@@ -112,6 +112,7 @@ async function createUserProfile() {
 }
 
 function updateUIForAuthenticatedUser() {
+    // Desktop
     const signInBtn = document.getElementById('signInBtn');
     const userProfileHeader = document.getElementById('userProfileHeader');
     const userNameHeader = document.getElementById('userNameHeader');
@@ -121,14 +122,38 @@ function updateUIForAuthenticatedUser() {
     if (userNameHeader) {
         userNameHeader.textContent = currentUser.displayName || currentUser.email.split('@')[0];
     }
+    
+    // 🆕 Mobile
+    const mobileSignInBtn = document.getElementById('mobileSignInBtn');
+    const mobileUserProfile = document.getElementById('mobileUserProfile');
+    const mobileUserName = document.getElementById('mobileUserName');
+    const mobileUserAvatar = document.getElementById('mobileUserAvatar');
+    
+    if (mobileSignInBtn) mobileSignInBtn.style.display = 'none';
+    if (mobileUserProfile) mobileUserProfile.style.display = 'flex';
+    if (mobileUserName) {
+        const displayName = currentUser.displayName || currentUser.email.split('@')[0];
+        mobileUserName.textContent = displayName;
+        if (mobileUserAvatar) {
+            mobileUserAvatar.textContent = displayName.charAt(0).toUpperCase();
+        }
+    }
 }
 
 function updateUIForGuestUser() {
+    // Desktop
     const signInBtn = document.getElementById('signInBtn');
     const userProfileHeader = document.getElementById('userProfileHeader');
     
     if (signInBtn) signInBtn.style.display = 'block';
     if (userProfileHeader) userProfileHeader.style.display = 'none';
+    
+    // 🆕 Mobile
+    const mobileSignInBtn = document.getElementById('mobileSignInBtn');
+    const mobileUserProfile = document.getElementById('mobileUserProfile');
+    
+    if (mobileSignInBtn) mobileSignInBtn.style.display = 'flex';
+    if (mobileUserProfile) mobileUserProfile.style.display = 'none';
 }
 
 // ==================== AUTH MODAL FUNCTIONS ====================
@@ -716,8 +741,22 @@ function toggleMobileMenu() {
     // Prevent body scroll when menu open
     if (nav.classList.contains('mobile-active')) {
         body.style.overflow = 'hidden';
+        
+        // Create overlay
+        let overlay = document.querySelector('.nav-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'nav-overlay';
+            overlay.onclick = toggleMobileMenu;
+            document.body.appendChild(overlay);
+        }
+        overlay.classList.add('active');
     } else {
         body.style.overflow = '';
+        const overlay = document.querySelector('.nav-overlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+        }
     }
 }
 
@@ -756,6 +795,8 @@ function showPage(pageId) {
         nav.classList.remove('mobile-active');
         hamburger.classList.remove('active');
         document.body.style.overflow = '';
+        const overlay = document.querySelector('.nav-overlay');
+        if (overlay) overlay.classList.remove('active');
     }
     
     if (pageId === 'practice') backToChapterSelection();
