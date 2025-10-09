@@ -5,21 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Virtual Lab - Berpikir Komputasional TPB ITB</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <header>
         <div class="header-content">
             <div class="logo">
-            <div class="logo-icon">
-        <div class="logo-icon">
-    <div class="logo-text">
-    <h1>VIRTUAL LAB</h1>
-    <p>by Kenzie R</p>
-</div>
- 
-</div>
-    </div>
-</div>
+                <div class="logo-icon">
+                    <div class="logo-text">
+                        <h1>VIRTUAL LAB</h1>
+                        <p>by Kenzie R</p>
+                    </div>
+                </div>
+            </div>
             <nav>
                 <ul>
                     <li><button onclick="showPage('home')" class="nav-btn active" data-page="home">Beranda</button></li>
@@ -27,10 +26,60 @@
                     <li><button onclick="showPage('practice')" class="nav-btn" data-page="practice">Latihan</button></li>
                     <li><button onclick="showPage('drag-drop')" class="nav-btn" data-page="drag-drop">Drag&Drop</button></li>
                     <li><button onclick="showPage('canvas-viz')" class="nav-btn" data-page="canvas-viz">Visualisasi</button></li>
+                    <li><button onclick="showPage('leaderboard')" class="nav-btn" data-page="leaderboard">Leaderboard</button></li>
+                    <li><button onclick="showPage('profile')" class="nav-btn" data-page="profile">Profil</button></li>
                 </ul>
             </nav>
+            <div class="auth-section" id="authSection">
+                <button onclick="showAuthModal('signin')" class="auth-button" id="signInBtn">Sign In</button>
+                <div class="user-profile-header" id="userProfileHeader" style="display: none;">
+                    <span class="user-name" id="userNameHeader"></span>
+                    <button onclick="signOut()" class="sign-out-btn">Sign Out</button>
+                </div>
+            </div>
         </div>
     </header>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeAuthModal()">&times;</span>
+            
+            <!-- Sign In Form -->
+            <div id="signInForm" class="auth-form">
+                <h2>Sign In</h2>
+                <input type="email" id="signInEmail" placeholder="Email" required>
+                <input type="password" id="signInPassword" placeholder="Password" required>
+                <button onclick="signIn()" class="auth-submit-btn">Sign In</button>
+                <p class="auth-switch">Belum punya akun? <a onclick="switchAuthForm('signup')">Sign Up</a></p>
+            </div>
+            
+            <!-- Sign Up Form -->
+            <div id="signUpForm" class="auth-form" style="display: none;">
+                <h2>Sign Up</h2>
+                <input type="text" id="signUpName" placeholder="Nama Lengkap" required>
+                <input type="email" id="signUpEmail" placeholder="Email" required>
+                <input type="password" id="signUpPassword" placeholder="Password (min 6 karakter)" required>
+                <button onclick="signUp()" class="auth-submit-btn">Sign Up</button>
+                <p class="auth-switch">Sudah punya akun? <a onclick="switchAuthForm('signin')">Sign In</a></p>
+            </div>
+            
+            <div id="authMessage" class="auth-message"></div>
+        </div>
+    </div>
+
+    <!-- Welcome Modal (muncul saat pertama kali buka web) -->
+    <div id="welcomeModal" class="modal" style="display: none;">
+        <div class="modal-content welcome-content">
+            <h2>Selamat Datang di Virtual Lab! 🎉</h2>
+            <p>Untuk menyimpan progress pembelajaran Anda, silakan Sign In atau Sign Up terlebih dahulu.</p>
+            <div class="welcome-buttons">
+                <button onclick="showAuthModal('signin')" class="welcome-btn">Sign In</button>
+                <button onclick="showAuthModal('signup')" class="welcome-btn">Sign Up</button>
+                <button onclick="closeWelcomeModal()" class="welcome-btn-skip">Lanjutkan Tanpa Akun</button>
+            </div>
+        </div>
+    </div>
 
     <main>
         <section id="home" class="page active">
@@ -174,6 +223,11 @@
                             </ul>
                         </div>
                     </div>
+                    <div class="chapter-actions">
+                        <button onclick="markChapterComplete(1)" class="complete-chapter-btn" id="completeBtn-1">
+                            <span class="check-icon">✓</span> Tandai Pembelajaran Selesai
+                        </button>
+                    </div>
                 </article>
 
                 <article id="bab2" class="chapter-item">
@@ -217,6 +271,11 @@
                                 <li>Salah memahami fungsi range(), karena range(n) menghasilkan urutan dari 0 sampai n-1, bukan sampai n.</li>
                             </ul>
                         </div>
+                    </div>
+                    <div class="chapter-actions">
+                        <button onclick="markChapterComplete(2)" class="complete-chapter-btn" id="completeBtn-2">
+                            <span class="check-icon">✓</span> Tandai Pembelajaran Selesai
+                        </button>
                     </div>
                 </article>
 
@@ -262,6 +321,11 @@
                             </ul>
                         </div>
                     </div>
+                    <div class="chapter-actions">
+                        <button onclick="markChapterComplete(3)" class="complete-chapter-btn" id="completeBtn-3">
+                            <span class="check-icon">✓</span> Tandai Pembelajaran Selesai
+                        </button>
+                    </div>
                 </article>
 
                 <article id="bab4" class="chapter-item">
@@ -304,6 +368,11 @@
                                 <li>Membalik urutan indeks baris dan kolom.</li>
                             </ul>
                         </div>
+                    </div>
+                    <div class="chapter-actions">
+                        <button onclick="markChapterComplete(4)" class="complete-chapter-btn" id="completeBtn-4">
+                            <span class="check-icon">✓</span> Tandai Pembelajaran Selesai
+                        </button>
                     </div>
                 </article>
 
@@ -349,6 +418,11 @@
                                 <li>Sebaiknya hindari mengubah variabel global dari dalam fungsi, karena dapat membingungkan alur program.</li>
                             </ul>
                         </div>
+                    </div>
+                    <div class="chapter-actions">
+                        <button onclick="markChapterComplete(5)" class="complete-chapter-btn" id="completeBtn-5">
+                            <span class="check-icon">✓</span> Tandai Pembelajaran Selesai
+                        </button>
                     </div>
                 </article>
             </div>
@@ -421,6 +495,7 @@
                 </div>
             </div>
         </section>
+
         <section id="drag-drop" class="page">
             <h1 class="page-title">Latihan Drag & Drop - Susun Kode</h1>
             
@@ -461,6 +536,7 @@
 
             <div id="drag-feedback" class="feedback-area"></div>
         </section>
+
         <section id="canvas-viz" class="page">
             <h1 class="page-title">Visualisasi Algoritma Sorting</h1>
             
@@ -502,6 +578,75 @@
                 <h3>Penjelasan Algoritma</h3>
                 <div id="algoExplanation">
                     <p><strong>Bubble Sort:</strong> Membandingkan elemen bersebelahan dan menukarnya jika urutannya salah. Proses ini diulang hingga tidak ada lagi pertukaran.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page Leaderboard -->
+        <section id="leaderboard" class="page">
+            <h1 class="page-title">🏆 Leaderboard</h1>
+            
+            <div class="leaderboard-container">
+                <div class="leaderboard-intro">
+                    <p>Lihat ranking mahasiswa berdasarkan total nilai latihan!</p>
+                </div>
+                
+                <div id="leaderboardList" class="leaderboard-list">
+                    <div class="loading-message">Memuat data leaderboard...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page Profile -->
+        <section id="profile" class="page">
+            <h1 class="page-title">👤 Profil Saya</h1>
+            
+            <div class="profile-container">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <span id="profileInitial">?</span>
+                    </div>
+                    <div class="profile-info">
+                        <h2 id="profileName">Guest User</h2>
+                        <p id="profileEmail">-</p>
+                    </div>
+                </div>
+                
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-content">
+                            <h3>Modul Selesai</h3>
+                            <p class="stat-value" id="completedModules">0 / 5</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-content">
+                            <h3>Total Nilai Latihan</h3>
+                            <p class="stat-value" id="totalScore">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-content">
+                            <h3>Akurasi Drag & Drop</h3>
+                            <p class="stat-value" id="dragDropAccuracy">0%</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress-details">
+                    <h3>Detail Progress per Bab</h3>
+                    <div id="chapterScoresList" class="chapter-scores-list">
+                        <!-- Akan diisi oleh JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="profile-actions">
+                    <button onclick="signOut()" class="sign-out-button">Sign Out</button>
                 </div>
             </div>
         </section>

@@ -1,3 +1,593 @@
+// ==================== SUPABASE CONFIGURATION ====================
+// PENTING: Ganti dengan kredensial Supabase Anda sendiri
+const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // Contoh: https://xxxxx.supabase.co
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Key dari Supabase Dashboard
+
+let supabaseClient;
+let currentUser = null;
+
+// Initialize Supabase Client
+function initSupabase() {
+    if (typeof supabase !== 'undefined') {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        checkAuthState();
+    } else {
+        console.error('Supabase library not loaded');
+    }
+}
+
+// ==================== AUTH FUNCTIONS ====================
+
+// Check current authentication state
+async function checkAuthState() {
+    try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        
+        if (session && session.user) {
+            currentUser = session.user;
+            await loadUserProfile();
+            updateUIForAuthenticatedUser();
+        } else {
+            updateUIForGuestUser();
+            // Show welcome modal only once per session
+            if (!sessionStorage.getItem('welcomeShown')) {
+                showWelcomeModal();
+                sessionStorage.setItem('welcomeShown', 'true');
+            }
+        }
+    } catch (error) {
+        console.error('Error checking auth state:', error);
+    }
+}
+
+// Load user profile data
+async function loadUserProfile() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('user_profiles')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .single();
+        
+        if (error && error.code === 'PGRST116') {
+            // Profile doesn't exist, create one
+            await createUserProfile();
+        } else if (data) {
+            currentUser.displayName = data.display_name;
+        }
+    } catch (error) {
+        console.error('Error loading profile:', error);
+    }
+}
+
+// Create user profile
+async function createUserProfile() {
+    try {
+        const displayName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+        
+        const { error } = await supabaseClient
+            .from('user_profiles')
+            .insert([
+                {
+                    user_id: currentUser.id,
+                    display_name: displayName
+                }
+            ]);
+        
+        if (!error) {
+            currentUser.displayName = displayName;
+        }
+    } catch (error) {
+        console.error('Error creating profile:', error);
+    }
+}
+
+// Update UI for authenticated user
+function updateUIForAuthenticatedUser() {
+    const signInBtn = document.getElementById('signInBtn');
+    const userProfileHeader = document.getElementById('userProfileHeader');
+    const userNameHeader = document.getElementById('userNameHeader');
+    
+    if (signInBtn) signInBtn.style.display = 'none';
+    if (userProfileHeader) userProfileHeader.style.display = 'flex';
+    if (userNameHeader) {
+        userNameHeader.textContent = currentUser.displayName || currentUser.email.split('@')[0];
+    }
+}
+
+// Update UI for guest user
+function updateUIForGuestUser() {
+    const signInBtn = document.getElementById('signInBtn');
+    const userProfileHeader = document.getElementById('userProfileHeader');
+    
+    if (signInBtn) signInBtn.style.display = 'block';
+    if (userProfileHeader) userProfileHeader.style.display = 'none';
+}
+
+// Show welcome modal
+function showWelcomeModal() {
+    const modal = document.getElementById('welcomeModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    }
+}
+
+// Close welcome modal
+function closeWelcomeModal() {
+    const modal = document.getElementById('welcomeModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+    }
+}
+
+// Show auth modal
+function showAuthModal(type) {
+    closeWelcomeModal();
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    }
+    switchAuthForm(type);
+}
+
+// Close auth modal
+function closeAuthModal() {
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+    }
+    clearAuthMessage();
+}
+
+// Switch between sign in and sign up forms
+function switchAuthForm(type) {
+    const signInForm = document.getElementById('signInForm');
+    const signUpForm = document.getElementById('signUpForm');
+    
+    if (type === 'signin') {
+        signInForm.style.display = 'block';
+        signUpForm.style.display = 'none';
+    } else {
+        signInForm.style.display = 'none';
+        signUpForm.style.display = 'block';
+    }
+    clearAuthMessage();
+}
+
+// Sign In
+async function signIn() {
+    const email = document.getElementById('signInEmail').value.trim();
+    const password = document.getElementById('signInPassword').value;
+    
+    if (!email || !password) {
+        showAuthMessage('Mohon isi email dan password', 'error');
+        return;
+    }
+    
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+        
+        if (error) throw error;
+        
+        currentUser = data.user;
+        await loadUserProfile();
+        showAuthMessage('Sign in berhasil! Selamat datang kembali.', 'success');
+        
+        setTimeout(() => {
+            closeAuthModal();
+            updateUIForAuthenticatedUser();
+            loadUserProgress();
+        }, 1500);
+        
+    } catch (error) {
+        showAuthMessage(error.message, 'error');
+    }
+}
+
+// Sign Up
+async function signUp() {
+    const name = document.getElementById('signUpName').value.trim();
+    const email = document.getElementById('signUpEmail').value.trim();
+    const password = document.getElementById('signUpPassword').value;
+    
+    if (!name || !email || !password) {
+        showAuthMessage('Mohon isi semua field', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showAuthMessage('Password minimal 6 karakter', 'error');
+        return;
+    }
+    
+    try {
+        const { data, error } = await supabaseClient.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    full_name: name
+                }
+            }
+        });
+        
+        if (error) throw error;
+        
+        // Create profile
+        if (data.user) {
+            await supabaseClient
+                .from('user_profiles')
+                .insert([
+                    {
+                        user_id: data.user.id,
+                        display_name: name
+                    }
+                ]);
+            
+            // Initialize progress
+            await supabaseClient
+                .from('user_progress')
+                .insert([
+                    {
+                        user_id: data.user.id,
+                        completed_modules: [],
+                        chapter_scores: {},
+                        drag_drop_stats: { attempts: 0, correct: 0 }
+                    }
+                ]);
+        }
+        
+        showAuthMessage('Pendaftaran berhasil! Silakan cek email untuk verifikasi.', 'success');
+        
+        setTimeout(() => {
+            switchAuthForm('signin');
+        }, 2000);
+        
+    } catch (error) {
+        showAuthMessage(error.message, 'error');
+    }
+}
+
+// Sign Out
+async function signOut() {
+    try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) throw error;
+        
+        currentUser = null;
+        updateUIForGuestUser();
+        showPage('home');
+        alert('Sign out berhasil!');
+        
+    } catch (error) {
+        console.error('Error signing out:', error);
+        alert('Gagal sign out: ' + error.message);
+    }
+}
+
+// Show auth message
+function showAuthMessage(message, type) {
+    const messageDiv = document.getElementById('authMessage');
+    if (messageDiv) {
+        messageDiv.textContent = message;
+        messageDiv.className = `auth-message show ${type}`;
+    }
+}
+
+// Clear auth message
+function clearAuthMessage() {
+    const messageDiv = document.getElementById('authMessage');
+    if (messageDiv) {
+        messageDiv.className = 'auth-message';
+        messageDiv.textContent = '';
+    }
+}
+
+// ==================== PROGRESS TRACKING ====================
+
+// Mark chapter as complete
+async function markChapterComplete(chapterNum) {
+    if (!currentUser) {
+        alert('Silakan Sign In terlebih dahulu untuk menyimpan progress!');
+        showAuthModal('signin');
+        return;
+    }
+    
+    try {
+        // Get current progress
+        const { data: progress, error: fetchError } = await supabaseClient
+            .from('user_progress')
+            .select('completed_modules')
+            .eq('user_id', currentUser.id)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        let completedModules = progress?.completed_modules || [];
+        
+        // Check if already completed
+        if (completedModules.includes(chapterNum)) {
+            alert('Bab ini sudah ditandai selesai!');
+            return;
+        }
+        
+        // Add to completed
+        completedModules.push(chapterNum);
+        
+        // Update database
+        const { error: updateError } = await supabaseClient
+            .from('user_progress')
+            .update({ 
+                completed_modules: completedModules,
+                updated_at: new Date().toISOString()
+            })
+            .eq('user_id', currentUser.id);
+        
+        if (updateError) throw updateError;
+        
+        // Update UI
+        const btn = document.getElementById(`completeBtn-${chapterNum}`);
+        if (btn) {
+            btn.classList.add('completed');
+            btn.innerHTML = '<span class="check-icon">✓</span> Pembelajaran Selesai!';
+        }
+        
+        alert(`Selamat! Bab ${chapterNum} telah ditandai selesai! 🎉`);
+        
+    } catch (error) {
+        console.error('Error marking chapter complete:', error);
+        alert('Gagal menyimpan progress: ' + error.message);
+    }
+}
+
+// Load user progress on page load
+async function loadUserProgress() {
+    if (!currentUser) return;
+    
+    try {
+        const { data, error } = await supabaseClient
+            .from('user_progress')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .single();
+        
+        if (error && error.code === 'PGRST116') {
+            // No progress yet, create initial record
+            await supabaseClient
+                .from('user_progress')
+                .insert([
+                    {
+                        user_id: currentUser.id,
+                        completed_modules: [],
+                        chapter_scores: {},
+                        drag_drop_stats: { attempts: 0, correct: 0 }
+                    }
+                ]);
+        } else if (data) {
+            // Update UI with completed modules
+            const completedModules = data.completed_modules || [];
+            completedModules.forEach(chapterNum => {
+                const btn = document.getElementById(`completeBtn-${chapterNum}`);
+                if (btn) {
+                    btn.classList.add('completed');
+                    btn.innerHTML = '<span class="check-icon">✓</span> Pembelajaran Selesai!';
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error loading progress:', error);
+    }
+}
+
+// Save chapter score
+async function saveChapterScore(chapterNum, score) {
+    if (!currentUser) return;
+    
+    try {
+        const { data: progress, error: fetchError } = await supabaseClient
+            .from('user_progress')
+            .select('chapter_scores')
+            .eq('user_id', currentUser.id)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        let chapterScores = progress?.chapter_scores || {};
+        
+        // Update score only if new score is higher
+        const currentScore = chapterScores[`bab${chapterNum}`] || 0;
+        if (score > currentScore) {
+            chapterScores[`bab${chapterNum}`] = score;
+            
+            const { error: updateError } = await supabaseClient
+                .from('user_progress')
+                .update({ 
+                    chapter_scores: chapterScores,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('user_id', currentUser.id);
+            
+            if (updateError) throw updateError;
+        }
+    } catch (error) {
+        console.error('Error saving score:', error);
+    }
+}
+
+// Update drag & drop statistics
+async function updateDragDropStats(isCorrect) {
+    if (!currentUser) return;
+    
+    try {
+        const { data: progress, error: fetchError } = await supabaseClient
+            .from('user_progress')
+            .select('drag_drop_stats')
+            .eq('user_id', currentUser.id)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        let stats = progress?.drag_drop_stats || { attempts: 0, correct: 0 };
+        stats.attempts += 1;
+        if (isCorrect) stats.correct += 1;
+        
+        const { error: updateError } = await supabaseClient
+            .from('user_progress')
+            .update({ 
+                drag_drop_stats: stats,
+                updated_at: new Date().toISOString()
+            })
+            .eq('user_id', currentUser.id);
+        
+        if (updateError) throw updateError;
+        
+    } catch (error) {
+        console.error('Error updating drag&drop stats:', error);
+    }
+}
+
+// ==================== LEADERBOARD ====================
+
+async function loadLeaderboard() {
+    const leaderboardList = document.getElementById('leaderboardList');
+    if (!leaderboardList) return;
+    
+    try {
+        leaderboardList.innerHTML = '<div class="loading-message">Memuat data leaderboard...</div>';
+        
+        const { data: progressData, error: progressError } = await supabaseClient
+            .from('user_progress')
+            .select('*');
+        
+        if (progressError) throw progressError;
+        
+        const { data: profilesData, error: profilesError } = await supabaseClient
+            .from('user_profiles')
+            .select('*');
+        
+        if (profilesError) throw profilesError;
+        
+        const leaderboardData = progressData.map(progress => {
+            const profile = profilesData.find(p => p.user_id === progress.user_id);
+            const scores = progress.chapter_scores || {};
+            const totalScore = Object.values(scores).reduce((sum, score) => sum + score, 0);
+            const completedModules = (progress.completed_modules || []).length;
+            
+            return {
+                userId: progress.user_id,
+                name: profile?.display_name || 'User',
+                totalScore: totalScore,
+                completedModules: completedModules
+            };
+        });
+        
+        leaderboardData.sort((a, b) => b.totalScore - a.totalScore);
+        
+        if (leaderboardData.length === 0) {
+            leaderboardList.innerHTML = '<div class="loading-message">Belum ada data leaderboard.</div>';
+            return;
+        }
+        
+        leaderboardList.innerHTML = '';
+        leaderboardData.forEach((user, index) => {
+            const rank = index + 1;
+            const item = document.createElement('div');
+            item.className = `leaderboard-item ${rank <= 3 ? `top-${rank}` : ''}`;
+            
+            let rankDisplay = rank;
+            if (rank === 1) rankDisplay = '🥇';
+            else if (rank === 2) rankDisplay = '🥈';
+            else if (rank === 3) rankDisplay = '🥉';
+            
+            item.innerHTML = `
+                <div class="leaderboard-rank">${rankDisplay}</div>
+                <div class="leaderboard-user-info">
+                    <div class="leaderboard-name">${user.name}</div>
+                    <div class="leaderboard-progress">${user.completedModules} / 5 Modul Selesai</div>
+                </div>
+                <div class="leaderboard-score">${user.totalScore}</div>
+            `;
+            
+            leaderboardList.appendChild(item);
+        });
+        
+    } catch (error) {
+        console.error('Error loading leaderboard:', error);
+        leaderboardList.innerHTML = '<div class="loading-message">Gagal memuat leaderboard.</div>';
+    }
+}
+
+// ==================== PROFILE PAGE ====================
+
+async function loadProfilePage() {
+    if (!currentUser) {
+        document.getElementById('profileName').textContent = 'Guest User';
+        document.getElementById('profileEmail').textContent = 'Silakan Sign In untuk melihat profil';
+        document.getElementById('completedModules').textContent = '-';
+        document.getElementById('totalScore').textContent = '-';
+        document.getElementById('dragDropAccuracy').textContent = '-';
+        document.getElementById('chapterScoresList').innerHTML = '<p style="text-align:center; color:var(--text-secondary)">Tidak ada data. Silakan Sign In terlebih dahulu.</p>';
+        return;
+    }
+    
+    try {
+        const { data: profile } = await supabaseClient
+            .from('user_profiles')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .single();
+        
+        const { data: progress } = await supabaseClient
+            .from('user_progress')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .single();
+        
+        const displayName = profile?.display_name || currentUser.email.split('@')[0];
+        document.getElementById('profileName').textContent = displayName;
+        document.getElementById('profileEmail').textContent = currentUser.email;
+        document.getElementById('profileInitial').textContent = displayName.charAt(0).toUpperCase();
+        
+        const completedModules = progress?.completed_modules || [];
+        const chapterScores = progress?.chapter_scores || {};
+        const dragDropStats = progress?.drag_drop_stats || { attempts: 0, correct: 0 };
+        
+        const totalScore = Object.values(chapterScores).reduce((sum, score) => sum + score, 0);
+        const accuracy = dragDropStats.attempts > 0 
+            ? Math.round((dragDropStats.correct / dragDropStats.attempts) * 100) 
+            : 0;
+        
+        document.getElementById('completedModules').textContent = `${completedModules.length} / 5`;
+        document.getElementById('totalScore').textContent = totalScore;
+        document.getElementById('dragDropAccuracy').textContent = `${accuracy}%`;
+        
+        const chapterScoresList = document.getElementById('chapterScoresList');
+        chapterScoresList.innerHTML = '';
+        
+        for (let i = 1; i <= 5; i++) {
+            const score = chapterScores[`bab${i}`] || 0;
+            const item = document.createElement('div');
+            item.className = 'chapter-score-item';
+            item.innerHTML = `
+                <div class="chapter-score-name">Bab ${i}</div>
+                <div class="chapter-score-value">${score}</div>
+            `;
+            chapterScoresList.appendChild(item);
+        }
+        
+    } catch (error) {
+        console.error('Error loading profile:', error);
+    }
+}
+// ==================== NAVIGATION & PAGE MANAGEMENT ====================
+
 function showPage(pageId) {
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => page.classList.remove('active'));
@@ -14,6 +604,15 @@ function showPage(pageId) {
     
     if (pageId === 'drag-drop') {
         resetDragExercise();
+    }
+    
+    // Load data for specific pages
+    if (pageId === 'leaderboard') {
+        loadLeaderboard();
+    } else if (pageId === 'profile') {
+        loadProfilePage();
+    } else if (pageId === 'material') {
+        loadUserProgress();
     }
 }
 
@@ -37,6 +636,8 @@ function backToChapterSelection() {
     document.getElementById('chapter-selection').style.display = 'block';
     document.getElementById('problems-container').style.display = 'none';
 }
+
+// ==================== PROBLEMS DATA ====================
 
 const problemsData = {
     1: [
@@ -245,7 +846,9 @@ function playVideo(chapterNumber) {
     }
 }
 
-function runCode(problemId) {
+// ==================== CODE EXECUTION & SCORING ====================
+
+async function runCode(problemId) {
     const editor = document.getElementById(`editor-${problemId}`);
     const output = document.getElementById(`output-${problemId}`);
     const scoreDisplay = document.getElementById(`score-${problemId}`);
@@ -261,7 +864,7 @@ function runCode(problemId) {
     runButton.disabled = true;
     runButton.innerHTML = '<span>⏳</span><span>Menjalankan...</span>';
     
-    setTimeout(() => {
+    setTimeout(async () => {
         const result = simulatePythonExecution(code, problemId);
         output.innerHTML = result.output;
         
@@ -282,6 +885,10 @@ function runCode(problemId) {
         if (score >= 70) {
             showMessage(output, 'success', 'Excellent! Kode Anda berjalan dengan baik!');
         }
+        
+        // Save score to database
+        const [chapter, problem] = problemId.split('-').map(Number);
+        await saveChapterScore(chapter, score);
     }, 1500);
 }
 
@@ -488,6 +1095,8 @@ function calculateScore(code, problemId) {
     
     return Math.min(score, 100);
 }
+
+// ==================== SCORING REQUIREMENTS ====================
 
 function getRequirements(chapter, problem) {
     const requirements = {
@@ -712,17 +1321,7 @@ function showMessage(container, type, message) {
     }, 5000);
 }
 
-document.addEventListener('keydown', function(e) {
-    if (e.ctrlKey && e.key === 'Enter') {
-        const activeEditor = document.activeElement;
-        if (activeEditor && activeEditor.classList.contains('code-editor')) {
-            const problemId = activeEditor.id.split('-').slice(1).join('-');
-            runCode(problemId);
-        }
-        e.preventDefault();
-    }
-});
-
+// ==================== DRAG & DROP ====================
 
 let draggedElement = null;
 
@@ -861,7 +1460,7 @@ function handleDrop(e) {
     return false;
 }
 
-function checkDragSolution() {
+async function checkDragSolution() {
     const solutionArea = document.getElementById('solution-area');
     const blocks = solutionArea.querySelectorAll('.code-block');
     const feedback = document.getElementById('drag-feedback');
@@ -885,9 +1484,15 @@ function checkDragSolution() {
                 block.style.animation = 'pulse 0.5s ease';
             }, index * 100);
         });
+        
+        // Update stats
+        await updateDragDropStats(true);
     } else {
         feedback.textContent = `❌ Belum tepat. Hint: ${problem.hint}`;
         feedback.className = 'feedback-area show incorrect';
+        
+        // Update stats
+        await updateDragDropStats(false);
     }
 }
 
@@ -928,42 +1533,16 @@ function resetDragExercise() {
     });
 }
 
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
-`;
-document.head.appendChild(style);
-
-document.addEventListener('DOMContentLoaded', function() {
-    const editors = document.querySelectorAll('.code-editor');
-    editors.forEach(editor => {
-        editor.addEventListener('input', function() {
-            this.style.color = 'var(--text-primary)';
-        });
-    });
-
-    document.documentElement.style.scrollBehavior = 'smooth';
-    
-    if (document.querySelector('.code-block')) {
-        resetDragExercise();
-        initDragAndDrop();
-    }
-});
-
+// Touch handlers for mobile
 function handleTouchStart(e) {
     e.preventDefault();
     draggedElement = this;
     this.classList.add('dragging');
-    
     this.style.opacity = '0.5';
 }
 
 function handleTouchMove(e) {
     e.preventDefault();
-    
     if (!draggedElement) return;
     
     const touch = e.touches[0];
@@ -981,7 +1560,6 @@ function handleTouchMove(e) {
 
 function handleTouchEnd(e) {
     e.preventDefault();
-    
     if (!draggedElement) return;
     
     const touch = e.changedTouches[0];
@@ -1029,6 +1607,8 @@ function getDragAfterElement(container, y) {
         }
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
+
+// ==================== CANVAS VISUALIZATION ====================
 
 const canvas = document.getElementById('sortCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
@@ -1212,8 +1792,42 @@ function resetCanvas() {
     generateRandomArray();
 }
 
+// ==================== INITIALIZATION ====================
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Supabase
+    initSupabase();
+    
+    // Initialize code editors
+    const editors = document.querySelectorAll('.code-editor');
+    editors.forEach(editor => {
+        editor.addEventListener('input', function() {
+            this.style.color = 'var(--text-primary)';
+        });
+    });
+
+    document.documentElement.style.scrollBehavior = 'smooth';
+    
+    // Initialize drag and drop
+    if (document.querySelector('.code-block')) {
+        resetDragExercise();
+        initDragAndDrop();
+    }
+    
+    // Initialize canvas
     if (canvas) {
         generateRandomArray();
     }
+    
+    // Keyboard shortcut for running code
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+            const activeEditor = document.activeElement;
+            if (activeEditor && activeEditor.classList.contains('code-editor')) {
+                const problemId = activeEditor.id.split('-').slice(1).join('-');
+                runCode(problemId);
+            }
+            e.preventDefault();
+        }
+    });
 });
