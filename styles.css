@@ -1971,47 +1971,57 @@ nav button.active::before {
 }
 
 /* ==================== MOBILE RESPONSIVE ==================== */
+/* ==================== MOBILE RESPONSIVE ==================== */
 @media (max-width: 767px) {
     .header-content {
         padding: 1rem;
-        gap: 1rem;
+        gap: 0.75rem;
+        flex-direction: row; /* ✅ HORIZONTAL (bukan vertical) */
+        flex-wrap: nowrap; /* ✅ Cegah wrap ke baris baru */
+        align-items: center;
     }
 
-    /* ✅ Show hamburger button di mobile */
+    /* ✅ Hamburger di paling kiri */
     .hamburger-btn {
         display: flex;
+        flex-shrink: 0; /* Prevent shrinking */
     }
 
-    /* ✅ Logo di tengah mobile */
+    /* ✅ Logo di antara hamburger dan auth */
     .logo {
-        flex: 1; /* Take remaining space between hamburger and auth */
+        flex: 1; /* Take remaining space */
         justify-content: flex-start;
         margin-left: 0.5rem;
+        min-width: 0; /* Allow shrinking if needed */
     }
 
     .logo-text h1 {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .logo-text p {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
+        white-space: nowrap;
     }
 
     /* ✅ Hide desktop navigation */
     nav {
-        display: none; /* Hidden di desktop mode */
+        display: none;
     }
 
     /* ✅ Mobile navigation (slide from left) */
     .main-nav {
         position: fixed;
         top: 0;
-        left: -100%; /* ✅ Slide dari KIRI (bukan kanan) */
+        left: -100%;
         width: 70%;
         max-width: 280px;
         height: 100vh;
         background: var(--primary-dark);
-        border-right: 1px solid var(--border-color); /* ✅ Border di kanan */
+        border-right: 1px solid var(--border-color);
         padding-top: 4rem;
         transition: left 0.3s ease;
         z-index: 1000;
@@ -2019,7 +2029,6 @@ nav button.active::before {
         display: block;
     }
 
-    /* ✅ Show navigation saat menu terbuka */
     .main-nav.active {
         left: 0;
     }
@@ -2043,29 +2052,45 @@ nav button.active::before {
     }
 
     nav button::before {
-        display: none; /* Remove hover line di mobile */
+        display: none;
     }
 
     /* ✅ Auth section tetap di kanan */
     .auth-section {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0; /* Prevent shrinking */
         margin-left: auto;
     }
 
     .auth-button {
-        padding: 0.5rem 1rem;
-        font-size: 0.85rem;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    /* ✅ User profile header (horizontal) */
+    .user-profile-header {
+        display: flex;
+        flex-direction: row; /* ✅ HORIZONTAL */
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
     }
 
     .user-name {
         font-size: 0.8rem;
-        max-width: 80px;
+        max-width: 70px;
         overflow: hidden;
         text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .sign-out-btn {
-        padding: 0.4rem 0.8rem;
+        padding: 0.4rem 0.7rem;
         font-size: 0.75rem;
+        white-space: nowrap;
     }
 
     /* ✅ Overlay background saat menu terbuka */
@@ -2084,7 +2109,6 @@ nav button.active::before {
         overflow: hidden;
     }
 }
-
 /* ==================== TABLET (optional) ==================== */
 @media (min-width: 768px) and (max-width: 1024px) {
     .header-content {
