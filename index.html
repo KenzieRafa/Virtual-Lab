@@ -2,44 +2,50 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"/>
     <title>Virtual Lab - Berpikir Komputasional TPB ITB</title>
     <link rel="stylesheet" href="styles.css">
     <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon">
-                    <div class="logo-text">
-                        <h1>VIRTUAL LAB</h1>
-                        <p>by Kenzie R</p>
-                    </div>
-                </div>
-            </div>
-            <nav>
-                <ul>
-                    <li><button onclick="showPage('home')" class="nav-btn active" data-page="home">Beranda</button></li>
-                    <li><button onclick="showPage('material')" class="nav-btn" data-page="material">Materi</button></li>
-                    <li><button onclick="showPage('practice')" class="nav-btn" data-page="practice">Latihan</button></li>
-                    <li><button onclick="showPage('drag-drop')" class="nav-btn" data-page="drag-drop">Drag&Drop</button></li>
-                    <li><button onclick="showPage('canvas-viz')" class="nav-btn" data-page="canvas-viz">Visualisasi</button></li>
-                    <li><button onclick="showPage('leaderboard')" class="nav-btn" data-page="leaderboard">Leaderboard</button></li>
-                    <li><button onclick="showPage('profile')" class="nav-btn" data-page="profile">Academic Progress</button></li>
-                </ul>
-            </nav>
-            <div class="auth-section" id="authSection">
-                <button onclick="showAuthModal('signin')" class="auth-button" id="signInBtn">Sign In</button>
-                <div class="user-profile-header" id="userProfileHeader" style="display: none;">
-                    <span class="user-name" id="userNameHeader"></span>
-                    <button onclick="signOut()" class="sign-out-btn">Sign Out</button>
-                </div>
+<header>
+    <div class="header-content">
+        <div class="logo">
+            <div class="logo-text">
+                <h1>VIRTUAL LAB</h1>
+                <p>by Kenzie R</p>
             </div>
         </div>
-    </header>
-
+        
+        <!-- Hamburger Menu Button (Mobile Only) -->
+        <button class="hamburger-menu" id="hamburgerBtn" onclick="toggleMobileMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        
+        <nav id="mainNav">
+            <ul>
+                <li><button onclick="showPage('home')" class="nav-btn active" data-page="home">Beranda</button></li>
+                <li><button onclick="showPage('material')" class="nav-btn" data-page="material">Materi</button></li>
+                <li><button onclick="showPage('practice')" class="nav-btn" data-page="practice">Latihan</button></li>
+                <li><button onclick="showPage('drag-drop')" class="nav-btn" data-page="drag-drop">Drag&Drop</button></li>
+                <li><button onclick="showPage('canvas-viz')" class="nav-btn" data-page="canvas-viz">Visualisasi</button></li>
+                <li><button onclick="showPage('leaderboard')" class="nav-btn" data-page="leaderboard">Leaderboard</button></li>
+                <li><button onclick="showPage('profile')" class="nav-btn" data-page="profile">Progress</button></li>
+            </ul>
+        </nav>
+        
+        <div class="auth-section" id="authSection">
+            <button onclick="showAuthModal('signin')" class="auth-button" id="signInBtn">Sign In</button>
+            <div class="user-profile-header" id="userProfileHeader" style="display: none;">
+                <span class="user-name" id="userNameHeader"></span>
+                <button onclick="signOut()" class="sign-out-btn">Sign Out</button>
+            </div>
+        </div>
+    </div>
+</header>
 <!-- Auth Modal -->
 <div id="authModal" class="modal">
     <div class="modal-content">
@@ -587,7 +593,7 @@
             </div>
 
             <div class="canvas-container">
-                <canvas id="sortCanvas" width="800" height="400"></canvas>
+                <canvas id="sortCanvas"></canvas>
             </div>
 
             <div class="canvas-info">

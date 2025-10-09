@@ -723,6 +723,43 @@ function showPage(pageId) {
     else if (pageId === 'material') loadUserProgress();
 }
 
+// ==================== MOBILE MENU TOGGLE ====================
+function toggleMobileMenu() {
+    const nav = document.getElementById('mainNav');
+    const hamburger = document.getElementById('hamburgerBtn');
+    
+    nav.classList.toggle('mobile-active');
+    hamburger.classList.toggle('active');
+}
+
+// Close menu ketika klik nav item
+function showPage(pageId) {
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(page => page.classList.remove('active'));
+    
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) targetPage.classList.add('active');
+
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => btn.classList.remove('active'));
+    const selectedButton = document.querySelector(`[data-page="${pageId}"]`);
+    if (selectedButton) selectedButton.classList.add('active');
+    
+    // 🆕 Close mobile menu after navigation
+    const nav = document.getElementById('mainNav');
+    const hamburger = document.getElementById('hamburgerBtn');
+    if (nav.classList.contains('mobile-active')) {
+        nav.classList.remove('mobile-active');
+        hamburger.classList.remove('active');
+    }
+    
+    if (pageId === 'practice') backToChapterSelection();
+    if (pageId === 'drag-drop') resetDragExercise();
+    if (pageId === 'leaderboard') loadLeaderboard();
+    else if (pageId === 'profile') loadProfilePage();
+    else if (pageId === 'material') loadUserProgress();
+}
+
 function showChapterProblems(chapterNum) {
     document.getElementById('chapter-selection').style.display = 'none';
     document.getElementById('problems-container').style.display = 'block';
@@ -1483,10 +1520,29 @@ let comparisons = 0;
 let swaps = 0;
 let isSorting = false;
 
+// 🆕 Responsive Canvas Setup
+function setupCanvas() {
+    if (!canvas) return;
+    
+    const container = canvas.parentElement;
+    const containerWidth = container.clientWidth - 40; // padding
+    const isMobile = window.innerWidth < 768;
+    
+    canvas.width = isMobile ? containerWidth : Math.min(800, containerWidth);
+    canvas.height = isMobile ? 250 : 400;
+}
+
 function generateRandomArray() {
     if (isSorting) return;
+    
+    setupCanvas(); // 🆕 Setup responsive canvas
+    
     array = [];
-    for (let i = 0; i < 40; i++) array.push(Math.floor(Math.random() * 350) + 20);
+    const arraySize = window.innerWidth < 480 ? 20 : 40; // Kurangi bar di mobile
+    for (let i = 0; i < arraySize; i++) {
+        array.push(Math.floor(Math.random() * (canvas.height - 50)) + 20);
+    }
+    
     comparisons = 0;
     swaps = 0;
     updateStats();
@@ -1494,55 +1550,13 @@ function generateRandomArray() {
     document.getElementById('sortStatus').textContent = 'Siap';
 }
 
-function drawArray(colorArray = []) {
-    if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const barWidth = canvas.width / array.length;
-    for (let i = 0; i < array.length; i++) {
-        ctx.fillStyle = colorArray[i] || '#3b82f6';
-        ctx.fillRect(i * barWidth, canvas.height - array[i], barWidth - 2, array[i]);
+// 🆕 Resize canvas saat window resize
+window.addEventListener('resize', () => {
+    if (canvas && document.getElementById('canvas-viz').classList.contains('active')) {
+        setupCanvas();
+        drawArray();
     }
-}
-
-function updateStats() {
-    document.getElementById('comparisons').textContent = comparisons;
-    document.getElementById('swaps').textContent = swaps;
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function bubbleSort() {
-    for (let i = 0; i < array.length - 1; i++) {
-        for (let j = 0; j < array.length - i - 1; j++) {
-            if (!isSorting) return;
-            comparisons++;
-            updateStats();
-            drawArray(array.map((_, idx) => idx === j || idx === j + 1 ? '#ef4444' : '#3b82f6'));
-            await sleep(50);
-            if (array[j] > array[j + 1]) {
-                [array[j], array[j + 1]] = [array[j + 1], array[j]];
-                swaps++;
-            }
-        }
-    }
-    drawArray(array.map(() => '#22c55e'));
-}
-
-async function startSorting() {
-    if (isSorting || array.length === 0) return;
-    isSorting = true;
-    document.getElementById('sortStatus').textContent = 'Sorting...';
-    await bubbleSort();
-    isSorting = false;
-    document.getElementById('sortStatus').textContent = 'Selesai!';
-}
-
-function resetCanvas() {
-    isSorting = false;
-    generateRandomArray();
-}
+});
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', function() {
