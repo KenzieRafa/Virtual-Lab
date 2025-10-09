@@ -884,6 +884,9 @@ function createProblemElement(problem, problemId, chapterNum) {
     const problemDiv = document.createElement('div');
     problemDiv.className = 'problem-item';
     
+    // Extract problem number from problemId (e.g., "1-3" -> 3)
+    const problemNum = parseInt(problemId.split('-')[1]);
+    
     problemDiv.innerHTML = `
         <div class="problem-header">
             <h3 class="problem-title">${problem.title}</h3>
@@ -979,7 +982,7 @@ async function runCode(problemId) {
             showMessage(output, 'success', 'Excellent! Kode Anda berjalan dengan baik!');
         }
         
-        // ❌ HAPUS BARIS INI:
+        // ❌ HAPUS BARIS INI - tidak auto save
         // await saveChapterScore(chapter, problem, score);
         
     }, 1500);
