@@ -228,8 +228,12 @@ async function signUp() {
             }]);
         }
         
-        showAuthMessage('Pendaftaran berhasil! Silakan sign in.', 'success');
-        setTimeout(() => switchAuthForm('signin'), 2000);
+        if (data.user) {
+    // ... kode insert database ...
+    
+    closeAuthModal();
+    alert(`✅ Pendaftaran Berhasil!\n\n📧 Kami telah mengirim email konfirmasi ke:\n${email}\n\nSilakan buka email Anda dan klik link konfirmasi sebelum Sign In.\n\n⚠️ Cek folder Spam jika tidak ada di Inbox.`);
+}
     } catch (error) {
         showAuthMessage(error.message, 'error');
     }
