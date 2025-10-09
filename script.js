@@ -1164,8 +1164,8 @@ function getRequirements(chapter, problem) {
                 {keyword: 'total', points: 15}, {keyword: 'input', points: 10}, {keyword: 'print', points: 10}],
             4: [{keyword: 'tahun_lahir', points: 15}, {keyword: 'tahun_target', points: 15}, {keyword: 'if', points: 20}, 
                 {keyword: '<', points: 15}, {keyword: 'else', points: 15}, {keyword: 'print', points: 15}],
-            5: [{keyword: '/3', points: 20}, {keyword: 'rata', points: 20}, {keyword: '60', points: 15}, 
-                {keyword: '>=', points: 15}, {keyword: 'if', points: 15}, {keyword: 'print', points: 10}]
+            5: [{keyword: 'rata', points: 25}, {keyword: '60', points: 20}, 
+                {keyword: '>=', points: 20}, {keyword: 'if', points: 20}, {keyword: 'print', points: 15}]
         },
         2: {
             1: [{keyword: 'while', points: 20}, {keyword: 'elif', points: 20}, {keyword: 'indeks', points: 15}, 
@@ -1176,15 +1176,15 @@ function getRequirements(chapter, problem) {
                 {keyword: 'tebakan', points: 15}, {keyword: 'elif', points: 15}, {keyword: 'break', points: 15}],
             4: [{keyword: 'split()', points: 20}, {keyword: '% 2', points: 25}, {keyword: 'genap', points: 15}, 
                 {keyword: '[', points: 15}, {keyword: 'len', points: 15}],
-            5: [{keyword: 'while true', points: 20}, {keyword: 'break', points: 20}, {keyword: 'elif', points: 15}, 
+            5: [{keyword: 'while true', points: 25}, {keyword: 'break', points: 25}, {keyword: 'elif', points: 20}, 
                 {keyword: 'float', points: 15}, {keyword: 'input', points: 15}]
         },
         3: {
             1: [{keyword: 'len(', points: 25}, {keyword: 'pesan', points: 20}, {keyword: 'if', points: 15}, 
                 {keyword: '<=', points: 15}, {keyword: 'else', points: 15}],
-            2: [{keyword: '[::-1]', points: 30}, {keyword: 'lower()', points: 20}, {keyword: 'ya', points: 15}, 
-                {keyword: 'if', points: 15}, {keyword: '==', points: 10}],
-            3: [{keyword: 'split(\',\')', points: 20}, {keyword: 'split(\':\')' , points: 20}, {keyword: 'total', points: 15}, 
+            2: [{keyword: '[::-1]', points: 35}, {keyword: 'lower()', points: 25}, {keyword: 'ya', points: 20}, 
+                {keyword: 'if', points: 10}, {keyword: '==', points: 10}],
+            3: [{keyword: "split(',')", points: 25}, {keyword: "split(':')", points: 25}, {keyword: 'total', points: 20}, 
                 {keyword: 'for', points: 15}, {keyword: 'append', points: 15}],
             4: [{keyword: 'set', points: 30}, {keyword: 'unik', points: 20}, {keyword: 'split()', points: 20}, 
                 {keyword: 'lower()', points: 15}, {keyword: 'len', points: 10}],
@@ -1194,12 +1194,12 @@ function getRequirements(chapter, problem) {
         4: {
             1: [{keyword: '[[0', points: 25}, {keyword: 'range(c)', points: 20}, {keyword: 'range(r)', points: 20}, 
                 {keyword: 'for', points: 20}, {keyword: 'print', points: 10}],
-            2: [{keyword: '[[\'', points: 20}, {keyword: 'join', points: 20}, {keyword: 'papan', points: 20}, 
+            2: [{keyword: "[['-'", points: 20}, {keyword: 'join', points: 20}, {keyword: 'papan', points: 20}, 
                 {keyword: 'int(input', points: 20}, {keyword: 'for row', points: 15}],
             3: [{keyword: 'sum(row)', points: 25}, {keyword: 'enumerate', points: 25}, {keyword: 'map(int', points: 20}, 
                 {keyword: 'append', points: 15}, {keyword: 'for', points: 10}],
-            4: [{keyword: '(i + j) % 2', points: 30}, {keyword: '"# "', points: 20}, {keyword: 'range(n)', points: 20}, 
-                {keyword: 'for i', points: 15}, {keyword: 'for j', points: 10}],
+            4: [{keyword: '(i + j) % 2', points: 35}, {keyword: '# ', points: 25}, {keyword: 'range(n)', points: 20}, 
+                {keyword: 'for i', points: 10}, {keyword: 'for j', points: 10}],
             5: [{keyword: 'mat[i][j]', points: 25}, {keyword: 'found', points: 20}, {keyword: 'break', points: 20}, 
                 {keyword: 'for i in range', points: 15}, {keyword: 'for j in range', points: 15}]
         },
