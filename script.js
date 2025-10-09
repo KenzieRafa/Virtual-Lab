@@ -1,118 +1,87 @@
 
-const SUPABASE_URL = 'https://blkplgvhkgtsgnindwht.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsa3BsZ3Zoa2d0c2duaW5kd2h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NDM1NjMsImV4cCI6MjA3NTUxOTU2M30.HClTmehLskf_mgebwpRH9g-gyprqjIs8mn97HBOIT1k'; 
-
-let supabaseClient;
+const SUPABASE_URL = 'https://blkplgvhkgtsgnindwht.supabase.co'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsa3BsZ3Zoa2d0c2duaW5kd2h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NDM1NjMsImV4cCI6MjA3NTUxOTU2M30.HClTmehLskf_mgebwpRH9g-gyprqjIs8mn97HBOIT1k';
+let supabaseClient = null;
 let currentUser = null;
+let isSupabaseEnabled = false;
 
-// Initialize Supabase Client
+
 function initSupabase() {
-    if (typeof supabase !== 'undefined') {
+    if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+        console.log('🔶 Running in DEMO MODE (without database)');
+        isSupabaseEnabled = false;
+        updateUIForGuestUser();
+        return;
+    }
+
+    if (typeof supabase === 'undefined') {
+        console.warn('⚠️ Supabase library not loaded');
+        isSupabaseEnabled = false;
+        updateUIForGuestUser();
+        return;
+    }
+
+    try {
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        isSupabaseEnabled = true;
         checkAuthState();
-    } else {
-        console.error('Supabase library not loaded');
+        console.log('✅ Supabase connected successfully');
+    } catch (error) {
+        console.error('❌ Supabase error:', error);
+        isSupabaseEnabled = false;
+        updateUIForGuestUser();
     }
 }
 
-// ==================== SCORING CALCULATION HELPERS ====================
-
-// Calculate average score for a chapter
-function calculateChapterAverage(chapterScores) {
-    if (!chapterScores || Object.keys(chapterScores).length === 0) {
-        return 0;
-    }
-    
-    const scores = Object.values(chapterScores);
-    const sum = scores.reduce((acc, score) => acc + score, 0);
-    return Math.round(sum / 5); // Always divide by 5 (5 soal per bab)
-}
-
-// Calculate Total Nilai Latihan (TNL)
-function calculateTotalScore(allChapterScores) {
-    let total = 0;
-    
-    for (let i = 1; i <= 5; i++) {
-        const babKey = `bab${i}`;
-        const chapterScores = allChapterScores[babKey] || {};
-        total += calculateChapterAverage(chapterScores);
-    }
-    
-    return total;
-}
-
-// Check if chapter average is already 100 (locked)
-function isChapterLocked(chapterScores) {
-    return calculateChapterAverage(chapterScores) >= 100;
-}
-
-// ==================== AUTH FUNCTIONS ====================
-
-// Check current authentication state
 async function checkAuthState() {
+    if (!isSupabaseEnabled) return;
     try {
         const { data: { session } } = await supabaseClient.auth.getSession();
-        
         if (session && session.user) {
             currentUser = session.user;
             await loadUserProfile();
             updateUIForAuthenticatedUser();
         } else {
             updateUIForGuestUser();
-            // Show welcome modal only once per session
             if (!sessionStorage.getItem('welcomeShown')) {
                 showWelcomeModal();
                 sessionStorage.setItem('welcomeShown', 'true');
             }
         }
     } catch (error) {
-        console.error('Error checking auth state:', error);
+        console.error('Auth check error:', error);
     }
 }
 
-// Load user profile data
 async function loadUserProfile() {
+    if (!isSupabaseEnabled || !currentUser) return;
     try {
-        const { data, error } = await supabaseClient
+        const { data } = await supabaseClient
             .from('user_profiles')
             .select('*')
             .eq('user_id', currentUser.id)
             .single();
-        
-        if (error && error.code === 'PGRST116') {
-            // Profile doesn't exist, create one
-            await createUserProfile();
-        } else if (data) {
-            currentUser.displayName = data.display_name;
-        }
+        if (data) currentUser.displayName = data.display_name;
+        else await createUserProfile();
     } catch (error) {
-        console.error('Error loading profile:', error);
+        console.error('Profile load error:', error);
     }
 }
 
-// Create user profile
 async function createUserProfile() {
+    if (!isSupabaseEnabled || !currentUser) return;
     try {
         const displayName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
-        
-        const { error } = await supabaseClient
-            .from('user_profiles')
-            .insert([
-                {
-                    user_id: currentUser.id,
-                    display_name: displayName
-                }
-            ]);
-        
-        if (!error) {
-            currentUser.displayName = displayName;
-        }
+        await supabaseClient.from('user_profiles').insert([{
+            user_id: currentUser.id,
+            display_name: displayName
+        }]);
+        currentUser.displayName = displayName;
     } catch (error) {
         console.error('Error creating profile:', error);
     }
 }
 
-// Update UI for authenticated user
 function updateUIForAuthenticatedUser() {
     const signInBtn = document.getElementById('signInBtn');
     const userProfileHeader = document.getElementById('userProfileHeader');
@@ -125,7 +94,6 @@ function updateUIForAuthenticatedUser() {
     }
 }
 
-// Update UI for guest user
 function updateUIForGuestUser() {
     const signInBtn = document.getElementById('signInBtn');
     const userProfileHeader = document.getElementById('userProfileHeader');
@@ -134,8 +102,10 @@ function updateUIForGuestUser() {
     if (userProfileHeader) userProfileHeader.style.display = 'none';
 }
 
-// Show welcome modal
+// ==================== AUTH MODAL FUNCTIONS ====================
+
 function showWelcomeModal() {
+    if (!isSupabaseEnabled) return;
     const modal = document.getElementById('welcomeModal');
     if (modal) {
         modal.style.display = 'flex';
@@ -143,7 +113,6 @@ function showWelcomeModal() {
     }
 }
 
-// Close welcome modal
 function closeWelcomeModal() {
     const modal = document.getElementById('welcomeModal');
     if (modal) {
@@ -152,8 +121,11 @@ function closeWelcomeModal() {
     }
 }
 
-// Show auth modal
 function showAuthModal(type) {
+    if (!isSupabaseEnabled) {
+        alert('Fitur autentikasi belum dikonfigurasi.');
+        return;
+    }
     closeWelcomeModal();
     const modal = document.getElementById('authModal');
     if (modal) {
@@ -163,7 +135,6 @@ function showAuthModal(type) {
     switchAuthForm(type);
 }
 
-// Close auth modal
 function closeAuthModal() {
     const modal = document.getElementById('authModal');
     if (modal) {
@@ -173,7 +144,6 @@ function closeAuthModal() {
     clearAuthMessage();
 }
 
-// Switch between sign in and sign up forms
 function switchAuthForm(type) {
     const signInForm = document.getElementById('signInForm');
     const signUpForm = document.getElementById('signUpForm');
@@ -188,8 +158,8 @@ function switchAuthForm(type) {
     clearAuthMessage();
 }
 
-// Sign In
 async function signIn() {
+    if (!isSupabaseEnabled) return;
     const email = document.getElementById('signInEmail').value.trim();
     const password = document.getElementById('signInPassword').value;
     
@@ -208,21 +178,20 @@ async function signIn() {
         
         currentUser = data.user;
         await loadUserProfile();
-        showAuthMessage('Sign in berhasil! Selamat datang kembali.', 'success');
+        showAuthMessage('Sign in berhasil!', 'success');
         
         setTimeout(() => {
             closeAuthModal();
             updateUIForAuthenticatedUser();
             loadUserProgress();
         }, 1500);
-        
     } catch (error) {
         showAuthMessage(error.message, 'error');
     }
 }
 
-// Sign Up
 async function signUp() {
+    if (!isSupabaseEnabled) return;
     const name = document.getElementById('signUpName').value.trim();
     const email = document.getElementById('signUpEmail').value.trim();
     const password = document.getElementById('signUpPassword').value;
@@ -241,68 +210,45 @@ async function signUp() {
         const { data, error } = await supabaseClient.auth.signUp({
             email: email,
             password: password,
-            options: {
-                data: {
-                    full_name: name
-                }
-            }
+            options: { data: { full_name: name } }
         });
         
         if (error) throw error;
         
-        // Create profile
         if (data.user) {
-            await supabaseClient
-                .from('user_profiles')
-                .insert([
-                    {
-                        user_id: data.user.id,
-                        display_name: name
-                    }
-                ]);
+            await supabaseClient.from('user_profiles').insert([{
+                user_id: data.user.id,
+                display_name: name
+            }]);
             
-            // Initialize progress
-            await supabaseClient
-                .from('user_progress')
-                .insert([
-                    {
-                        user_id: data.user.id,
-                        completed_modules: [],
-                        chapter_scores: {},
-                        drag_drop_stats: { attempts: 0, correct: 0 }
-                    }
-                ]);
+            await supabaseClient.from('user_progress').insert([{
+                user_id: data.user.id,
+                completed_modules: [],
+                chapter_scores: {},
+                drag_drop_stats: { attempts: 0, correct: 0 }
+            }]);
         }
         
-        showAuthMessage('Pendaftaran berhasil! Silakan cek email untuk verifikasi.', 'success');
-        
-        setTimeout(() => {
-            switchAuthForm('signin');
-        }, 2000);
-        
+        showAuthMessage('Pendaftaran berhasil! Silakan sign in.', 'success');
+        setTimeout(() => switchAuthForm('signin'), 2000);
     } catch (error) {
         showAuthMessage(error.message, 'error');
     }
 }
 
-// Sign Out
 async function signOut() {
+    if (!isSupabaseEnabled) return;
     try {
-        const { error } = await supabaseClient.auth.signOut();
-        if (error) throw error;
-        
+        await supabaseClient.auth.signOut();
         currentUser = null;
         updateUIForGuestUser();
         showPage('home');
         alert('Sign out berhasil!');
-        
     } catch (error) {
-        console.error('Error signing out:', error);
-        alert('Gagal sign out: ' + error.message);
+        console.error('Sign out error:', error);
     }
 }
 
-// Show auth message
 function showAuthMessage(message, type) {
     const messageDiv = document.getElementById('authMessage');
     if (messageDiv) {
@@ -311,7 +257,6 @@ function showAuthMessage(message, type) {
     }
 }
 
-// Clear auth message
 function clearAuthMessage() {
     const messageDiv = document.getElementById('authMessage');
     if (messageDiv) {
@@ -320,18 +265,80 @@ function clearAuthMessage() {
     }
 }
 
+// ==================== SCORE CALCULATION FUNCTIONS ====================
+
+// Hitung rata-rata per bab (dari 5 soal)
+function calculateChapterAverage(chapterScores, chapterNum) {
+    const babKey = `bab${chapterNum}`;
+    const soalScores = chapterScores[babKey] || {};
+    
+    const scores = [];
+    for (let i = 1; i <= 5; i++) {
+        scores.push(soalScores[`soal${i}`] || 0);
+    }
+    
+    const average = scores.reduce((sum, score) => sum + score, 0) / 5;
+    return Math.round(average);
+}
+
+// Hitung Total Nilai Latihan (maksimal 500)
+function calculateTotalScore(chapterScores) {
+    let total = 0;
+    for (let bab = 1; bab <= 5; bab++) {
+        total += calculateChapterAverage(chapterScores, bab);
+    }
+    return total;
+}
+
+// Save score per soal (bukan per bab)
+async function saveChapterScore(chapterNum, problemNum, score) {
+    if (!isSupabaseEnabled || !currentUser) return;
+    
+    try {
+        const { data: progress, error: fetchError } = await supabaseClient
+            .from('user_progress')
+            .select('chapter_scores')
+            .eq('user_id', currentUser.id)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        let chapterScores = progress?.chapter_scores || {};
+        
+        if (!chapterScores[`bab${chapterNum}`]) {
+            chapterScores[`bab${chapterNum}`] = {};
+        }
+        
+        const currentScore = chapterScores[`bab${chapterNum}`][`soal${problemNum}`] || 0;
+        
+        if (score > currentScore) {
+            chapterScores[`bab${chapterNum}`][`soal${problemNum}`] = score;
+            
+            await supabaseClient
+                .from('user_progress')
+                .update({ 
+                    chapter_scores: chapterScores,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('user_id', currentUser.id);
+            
+            console.log(`✅ Saved: Bab ${chapterNum} Soal ${problemNum} = ${score}`);
+        }
+    } catch (error) {
+        console.error('Error saving score:', error);
+    }
+}
+
 // ==================== PROGRESS TRACKING ====================
 
-// Mark chapter as complete
 async function markChapterComplete(chapterNum) {
-    if (!currentUser) {
+    if (!isSupabaseEnabled || !currentUser) {
         alert('Silakan Sign In terlebih dahulu untuk menyimpan progress!');
-        showAuthModal('signin');
+        if (isSupabaseEnabled) showAuthModal('signin');
         return;
     }
     
     try {
-        // Get current progress
         const { data: progress, error: fetchError } = await supabaseClient
             .from('user_progress')
             .select('completed_modules')
@@ -342,17 +349,14 @@ async function markChapterComplete(chapterNum) {
         
         let completedModules = progress?.completed_modules || [];
         
-        // Check if already completed
         if (completedModules.includes(chapterNum)) {
             alert('Bab ini sudah ditandai selesai!');
             return;
         }
         
-        // Add to completed
         completedModules.push(chapterNum);
         
-        // Update database
-        const { error: updateError } = await supabaseClient
+        await supabaseClient
             .from('user_progress')
             .update({ 
                 completed_modules: completedModules,
@@ -360,9 +364,6 @@ async function markChapterComplete(chapterNum) {
             })
             .eq('user_id', currentUser.id);
         
-        if (updateError) throw updateError;
-        
-        // Update UI
         const btn = document.getElementById(`completeBtn-${chapterNum}`);
         if (btn) {
             btn.classList.add('completed');
@@ -370,16 +371,13 @@ async function markChapterComplete(chapterNum) {
         }
         
         alert(`Selamat! Bab ${chapterNum} telah ditandai selesai! 🎉`);
-        
     } catch (error) {
         console.error('Error marking chapter complete:', error);
-        alert('Gagal menyimpan progress: ' + error.message);
     }
 }
 
-// Load user progress on page load
 async function loadUserProgress() {
-    if (!currentUser) return;
+    if (!isSupabaseEnabled || !currentUser) return;
     
     try {
         const { data, error } = await supabaseClient
@@ -389,19 +387,13 @@ async function loadUserProgress() {
             .single();
         
         if (error && error.code === 'PGRST116') {
-            // No progress yet, create initial record
-            await supabaseClient
-                .from('user_progress')
-                .insert([
-                    {
-                        user_id: currentUser.id,
-                        completed_modules: [],
-                        chapter_scores: {},
-                        drag_drop_stats: { attempts: 0, correct: 0 }
-                    }
-                ]);
+            await supabaseClient.from('user_progress').insert([{
+                user_id: currentUser.id,
+                completed_modules: [],
+                chapter_scores: {},
+                drag_drop_stats: { attempts: 0, correct: 0 }
+            }]);
         } else if (data) {
-            // Update UI with completed modules
             const completedModules = data.completed_modules || [];
             completedModules.forEach(chapterNum => {
                 const btn = document.getElementById(`completeBtn-${chapterNum}`);
@@ -416,98 +408,27 @@ async function loadUserProgress() {
     }
 }
 
-// Save chapter score
-// Save chapter score with new structure
-async function saveChapterScore(chapterNum, problemNum, score) {
-    if (!currentUser) return;
-    
-    try {
-        // Get current progress
-        const { data: progress, error: fetchError } = await supabaseClient
-            .from('user_progress')
-            .select('chapter_scores')
-            .eq('user_id', currentUser.id)
-            .single();
-        
-        if (fetchError) throw fetchError;
-        
-        let chapterScores = progress?.chapter_scores || {};
-        
-        // Initialize chapter if doesn't exist
-        const babKey = `bab${chapterNum}`;
-        if (!chapterScores[babKey]) {
-            chapterScores[babKey] = {};
-        }
-        
-        // Check if chapter is already locked at 100
-        const currentAverage = calculateChapterAverage(chapterScores[babKey]);
-        
-        // Get current score for this specific problem
-        const soalKey = `soal${problemNum}`;
-        const currentProblemScore = chapterScores[babKey][soalKey] || 0;
-        
-        // Only update if new score is higher than current score
-        if (score > currentProblemScore) {
-            chapterScores[babKey][soalKey] = score;
-            
-            // Calculate new average
-            const newAverage = calculateChapterAverage(chapterScores[babKey]);
-            
-            // Update database
-            const { error: updateError } = await supabaseClient
-                .from('user_progress')
-                .update({ 
-                    chapter_scores: chapterScores,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('user_id', currentUser.id);
-            
-            if (updateError) throw updateError;
-            
-            // Show feedback to user
-            if (currentAverage >= 100) {
-                console.log(`Bab ${chapterNum} sudah locked di 100, tidak menambah TNL`);
-            } else if (newAverage >= 100) {
-                alert(`🎉 Selamat! Bab ${chapterNum} mencapai nilai sempurna 100!`);
-            } else {
-                console.log(`Bab ${chapterNum} average: ${currentAverage} → ${newAverage}`);
-            }
-        } else {
-            console.log(`Skor tidak diupdate. Current: ${currentProblemScore}, New: ${score}`);
-        }
-        
-    } catch (error) {
-        console.error('Error saving score:', error);
-    }
-}
-
-// Update drag & drop statistics
 async function updateDragDropStats(isCorrect) {
-    if (!currentUser) return;
+    if (!isSupabaseEnabled || !currentUser) return;
     
     try {
-        const { data: progress, error: fetchError } = await supabaseClient
+        const { data: progress } = await supabaseClient
             .from('user_progress')
             .select('drag_drop_stats')
             .eq('user_id', currentUser.id)
             .single();
         
-        if (fetchError) throw fetchError;
-        
         let stats = progress?.drag_drop_stats || { attempts: 0, correct: 0 };
         stats.attempts += 1;
         if (isCorrect) stats.correct += 1;
         
-        const { error: updateError } = await supabaseClient
+        await supabaseClient
             .from('user_progress')
             .update({ 
                 drag_drop_stats: stats,
                 updated_at: new Date().toISOString()
             })
             .eq('user_id', currentUser.id);
-        
-        if (updateError) throw updateError;
-        
     } catch (error) {
         console.error('Error updating drag&drop stats:', error);
     }
@@ -519,38 +440,31 @@ async function loadLeaderboard() {
     const leaderboardList = document.getElementById('leaderboardList');
     if (!leaderboardList) return;
     
+    if (!isSupabaseEnabled) {
+        leaderboardList.innerHTML = '<div class="loading-message">Fitur leaderboard memerlukan Supabase.</div>';
+        return;
+    }
+
     try {
         leaderboardList.innerHTML = '<div class="loading-message">Memuat data leaderboard...</div>';
         
-        const { data: progressData, error: progressError } = await supabaseClient
-            .from('user_progress')
-            .select('*');
-        
-        if (progressError) throw progressError;
-        
-        const { data: profilesData, error: profilesError } = await supabaseClient
-            .from('user_profiles')
-            .select('*');
-        
-        if (profilesError) throw profilesError;
+        const { data: progressData } = await supabaseClient.from('user_progress').select('*');
+        const { data: profilesData } = await supabaseClient.from('user_profiles').select('*');
         
         const leaderboardData = progressData.map(progress => {
             const profile = profilesData.find(p => p.user_id === progress.user_id);
             const chapterScores = progress.chapter_scores || {};
-            
-            // Calculate TNL (Total Nilai Latihan)
             const totalScore = calculateTotalScore(chapterScores);
             const completedModules = (progress.completed_modules || []).length;
             
             return {
                 userId: progress.user_id,
                 name: profile?.display_name || 'User',
-                totalScore: totalScore, // TNL (max 500)
+                totalScore: totalScore,
                 completedModules: completedModules
             };
         });
         
-        // Sort by TNL descending
         leaderboardData.sort((a, b) => b.totalScore - a.totalScore);
         
         if (leaderboardData.length === 0) {
@@ -575,27 +489,37 @@ async function loadLeaderboard() {
                     <div class="leaderboard-name">${user.name}</div>
                     <div class="leaderboard-progress">${user.completedModules} / 5 Modul Selesai</div>
                 </div>
-                <div class="leaderboard-score">${user.totalScore}/500</div>
+                <div class="leaderboard-score">${user.totalScore} / 500</div>
             `;
             
             leaderboardList.appendChild(item);
         });
-        
     } catch (error) {
         console.error('Error loading leaderboard:', error);
         leaderboardList.innerHTML = '<div class="loading-message">Gagal memuat leaderboard.</div>';
     }
 }
+
 // ==================== PROFILE PAGE ====================
 
 async function loadProfilePage() {
-    if (!currentUser) {
-        document.getElementById('profileName').textContent = 'Guest User';
-        document.getElementById('profileEmail').textContent = 'Silakan Sign In untuk melihat profil';
+    if (!isSupabaseEnabled) {
+        document.getElementById('profileName').textContent = 'Demo Mode';
+        document.getElementById('profileEmail').textContent = 'Fitur profil memerlukan Supabase';
         document.getElementById('completedModules').textContent = '-';
         document.getElementById('totalScore').textContent = '-';
         document.getElementById('dragDropAccuracy').textContent = '-';
-        document.getElementById('chapterScoresList').innerHTML = '<p style="text-align:center; color:var(--text-secondary)">Tidak ada data. Silakan Sign In terlebih dahulu.</p>';
+        document.getElementById('chapterScoresList').innerHTML = '<p style="text-align:center; color:var(--text-secondary)">Supabase belum dikonfigurasi.</p>';
+        return;
+    }
+
+    if (!currentUser) {
+        document.getElementById('profileName').textContent = 'Guest User';
+        document.getElementById('profileEmail').textContent = 'Silakan Sign In';
+        document.getElementById('completedModules').textContent = '-';
+        document.getElementById('totalScore').textContent = '-';
+        document.getElementById('dragDropAccuracy').textContent = '-';
+        document.getElementById('chapterScoresList').innerHTML = '<p style="text-align:center; color:var(--text-secondary)">Silakan Sign In terlebih dahulu.</p>';
         return;
     }
     
@@ -621,84 +545,106 @@ async function loadProfilePage() {
         const chapterScores = progress?.chapter_scores || {};
         const dragDropStats = progress?.drag_drop_stats || { attempts: 0, correct: 0 };
         
-        // Calculate TNL (Total Nilai Latihan)
         const totalScore = calculateTotalScore(chapterScores);
-        
         const accuracy = dragDropStats.attempts > 0 
             ? Math.round((dragDropStats.correct / dragDropStats.attempts) * 100) 
             : 0;
         
         document.getElementById('completedModules').textContent = `${completedModules.length} / 5`;
-        document.getElementById('totalScore').textContent = `${totalScore}/500`; // Show TNL
+        document.getElementById('totalScore').textContent = `${totalScore} / 500`;
         document.getElementById('dragDropAccuracy').textContent = `${accuracy}%`;
         
         const chapterScoresList = document.getElementById('chapterScoresList');
         chapterScoresList.innerHTML = '';
         
-        // Display average per chapter
         for (let i = 1; i <= 5; i++) {
+            const average = calculateChapterAverage(chapterScores, i);
             const babKey = `bab${i}`;
-            const babScores = chapterScores[babKey] || {};
-            const average = calculateChapterAverage(babScores);
+            const soalScores = chapterScores[babKey] || {};
+            const completedSoals = Object.keys(soalScores).length;
             
             const item = document.createElement('div');
             item.className = 'chapter-score-item';
             
-            // Add visual indicator if chapter is completed
-            let statusIcon = '';
-            if (average >= 100) {
-                statusIcon = ' 🏆'; // Trophy for perfect score
-            } else if (average >= 70) {
-                statusIcon = ' ⭐'; // Star for good score
-            }
-            
-            // Count how many problems are completed
-            const completedProblems = Object.keys(babScores).length;
+            const perfectBadge = average === 100 ? ' <span style="color: #fbbf24;">⭐ Perfect!</span>' : '';
             
             item.innerHTML = `
                 <div class="chapter-score-name">
-                    Bab ${i}${statusIcon}
-                    <small style="color: var(--text-muted); font-size: 0.85rem; display: block;">
-                        ${completedProblems}/5 soal dikerjakan
-                    </small>
+                    Bab ${i}
+                    <span style="font-size: 0.85rem; color: var(--text-muted); margin-left: 0.5rem;">
+                        (${completedSoals}/5 soal)
+                    </span>
                 </div>
-                <div class="chapter-score-value">${average}/100</div>
+                <div class="chapter-score-value">${average} / 100${perfectBadge}</div>
             `;
             chapterScoresList.appendChild(item);
+            
+            const detailDiv = document.createElement('div');
+            detailDiv.className = 'chapter-detail';
+            detailDiv.style.paddingLeft = '1.5rem';
+            detailDiv.style.fontSize = '0.9rem';
+            detailDiv.style.color = 'var(--text-muted)';
+            detailDiv.style.marginTop = '0.5rem';
+            
+            let detailHTML = '';
+            for (let j = 1; j <= 5; j++) {
+                const soalScore = soalScores[`soal${j}`] || 0;
+                const soalStatus = soalScore === 100 ? '✓' : soalScore > 0 ? '○' : '—';
+                detailHTML += `
+                    <div style="display: flex; justify-content: space-between; padding: 0.25rem 0;">
+                        <span>${soalStatus} Soal ${i}.${j}</span>
+                        <span style="font-weight: 600; color: ${soalScore === 100 ? '#22c55e' : 'var(--text-primary)'};">
+                            ${soalScore}
+                        </span>
+                    </div>
+                `;
+            }
+            detailDiv.innerHTML = detailHTML;
+            chapterScoresList.appendChild(detailDiv);
         }
         
+        const summaryDiv = document.createElement('div');
+        summaryDiv.style.marginTop = '1.5rem';
+        summaryDiv.style.padding = '1rem';
+        summaryDiv.style.background = 'var(--primary-dark)';
+        summaryDiv.style.borderRadius = '8px';
+        summaryDiv.style.textAlign = 'center';
+        summaryDiv.innerHTML = `
+            <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                Total Nilai Latihan
+            </div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--accent-blue);">
+                ${totalScore} / 500
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+                ${((totalScore / 500) * 100).toFixed(1)}% Complete
+            </div>
+        `;
+        chapterScoresList.appendChild(summaryDiv);
     } catch (error) {
         console.error('Error loading profile:', error);
     }
 }
-// ==================== NAVIGATION & PAGE MANAGEMENT ====================
+
+// ==================== NAVIGATION ====================
 
 function showPage(pageId) {
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => page.classList.remove('active'));
-    document.getElementById(pageId).classList.add('active');
+    
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) targetPage.classList.add('active');
 
     const navButtons = document.querySelectorAll('.nav-btn');
     navButtons.forEach(btn => btn.classList.remove('active'));
     const selectedButton = document.querySelector(`[data-page="${pageId}"]`);
     if (selectedButton) selectedButton.classList.add('active');
     
-    if (pageId === 'practice') {
-        backToChapterSelection();
-    }
-    
-    if (pageId === 'drag-drop') {
-        resetDragExercise();
-    }
-    
-    // Load data for specific pages
-    if (pageId === 'leaderboard') {
-        loadLeaderboard();
-    } else if (pageId === 'profile') {
-        loadProfilePage();
-    } else if (pageId === 'material') {
-        loadUserProgress();
-    }
+    if (pageId === 'practice') backToChapterSelection();
+    if (pageId === 'drag-drop') resetDragExercise();
+    if (pageId === 'leaderboard') loadLeaderboard();
+    else if (pageId === 'profile') loadProfilePage();
+    else if (pageId === 'material') loadUserProgress();
 }
 
 function showChapterProblems(chapterNum) {
@@ -715,11 +661,6 @@ function showChapterProblems(chapterNum) {
     
     document.getElementById('current-chapter-title').textContent = chapterTitles[chapterNum];
     generateProblems(chapterNum);
-    
-    // ✅ LOAD SAVED SOLUTIONS
-    setTimeout(() => {
-        loadSavedSolutions(chapterNum);
-    }, 100);
 }
 
 function backToChapterSelection() {
@@ -870,9 +811,7 @@ const problemsData = {
 function generateProblems(chapterNum) {
     const container = document.getElementById('dynamic-problems');
     container.innerHTML = '';
-    
     const problems = problemsData[chapterNum];
-    
     problems.forEach((problem, index) => {
         const problemId = `${chapterNum}-${index + 1}`;
         const problemElement = createProblemElement(problem, problemId, chapterNum);
@@ -883,16 +822,10 @@ function generateProblems(chapterNum) {
 function createProblemElement(problem, problemId, chapterNum) {
     const problemDiv = document.createElement('div');
     problemDiv.className = 'problem-item';
-    
-    // Extract problem number from problemId (e.g., "1-3" -> 3)
-    const problemNum = parseInt(problemId.split('-')[1]);
-    
     problemDiv.innerHTML = `
         <div class="problem-header">
             <h3 class="problem-title">${problem.title}</h3>
-            <div class="problem-description">
-                ${problem.description}
-            </div>
+            <div class="problem-description">${problem.description}</div>
         </div>
         <div class="code-workspace">
             <div class="code-editor-section">
@@ -916,13 +849,9 @@ function createProblemElement(problem, problemId, chapterNum) {
                 <span>Jalankan Kode</span>
             </button>
             <button class="reset-button" onclick="resetCode('${problemId}')">Reset</button>
-            <button class="save-button" onclick="saveProblemSolution(${chapterNum}, ${problemNum}, '${problemId}')">
-                💾 Save Answer
-            </button>
             <div class="score-badge" id="score-${problemId}">Skor: 0/100</div>
         </div>
     `;
-    
     return problemDiv;
 }
 
@@ -934,25 +863,21 @@ function playVideo(chapterNumber) {
         4: "https://www.youtube.com/watch?v=6VDCFBKyn7Y",
         5: "https://www.youtube.com/watch?v=wQwf5eKpxqs"
     };
-
     if (videoLinks[chapterNumber]) {
-        window.open(videoLinks[chapterNumber], "_blank"); 
-    } else {
-        alert("Video belum tersedia untuk bab ini.");
+        window.open(videoLinks[chapterNumber], "_blank");
     }
 }
 
-// ==================== CODE EXECUTION & SCORING ====================
+// ==================== CODE EXECUTION ====================
 
 async function runCode(problemId) {
     const editor = document.getElementById(`editor-${problemId}`);
     const output = document.getElementById(`output-${problemId}`);
     const scoreDisplay = document.getElementById(`score-${problemId}`);
-    
     const code = editor.value.trim();
     
     if (!code) {
-        showMessage(output, 'error', 'Kode kosong! Silakan tulis kode Python Anda.');
+        showMessage(output, 'error', 'Kode kosong!');
         return;
     }
     
@@ -967,150 +892,19 @@ async function runCode(problemId) {
         const score = calculateScore(code, problemId);
         scoreDisplay.textContent = `Skor: ${score}/100`;
         
-        if (score >= 70) {
-            scoreDisplay.style.background = 'var(--gradient-accent)';
-        } else if (score >= 40) {
-            scoreDisplay.style.background = 'var(--text-muted)';
-        } else {
-            scoreDisplay.style.background = '#ef4444';
-        }
+        if (score >= 70) scoreDisplay.style.background = 'var(--gradient-accent)';
+        else if (score >= 40) scoreDisplay.style.background = 'var(--text-muted)';
+        else scoreDisplay.style.background = '#ef4444';
         
         runButton.disabled = false;
         runButton.innerHTML = '<span>▶</span><span>Jalankan Kode</span>';
         
-        if (score >= 70) {
-            showMessage(output, 'success', 'Excellent! Kode Anda berjalan dengan baik!');
-        }
+        if (score >= 70) showMessage(output, 'success', 'Excellent!');
         
-        // ❌ HAPUS BARIS INI - tidak auto save
-        // await saveChapterScore(chapter, problem, score);
-        
+        // Save score PER SOAL
+        const [chapter, problem] = problemId.split('-').map(Number);
+        await saveChapterScore(chapter, problem, score);
     }, 1500);
-}
-async function saveProblemSolution(chapterNum, problemNum, problemId) {
-    if (!currentUser) {
-        alert('Silakan Sign In terlebih dahulu untuk menyimpan jawaban!');
-        showAuthModal('signin');
-        return;
-    }
-    
-    // Ambil kode dan skor
-    const editor = document.getElementById(`editor-${problemId}`);
-    const scoreDisplay = document.getElementById(`score-${problemId}`);
-    const code = editor.value.trim();
-    
-    // Extract score from "Skor: 85/100" or "Tersimpan: 85/100"
-    const scoreText = scoreDisplay.textContent;
-    const scoreMatch = scoreText.match(/(\d+)\/100/);
-    const currentScore = scoreMatch ? parseInt(scoreMatch[1]) : 0;
-    
-    if (!code) {
-        alert('Tulis kode terlebih dahulu sebelum menyimpan!');
-        return;
-    }
-    
-    if (currentScore === 0) {
-        alert('Jalankan kode terlebih dahulu untuk mendapatkan skor!');
-        return;
-    }
-    
-    try {
-        // Get current progress
-        const { data: progress, error: fetchError } = await supabaseClient
-            .from('user_progress')
-            .select('chapter_scores')
-            .eq('user_id', currentUser.id)
-            .single();
-        
-        if (fetchError) throw fetchError;
-        
-        let chapterScores = progress?.chapter_scores || {};
-        
-        // Initialize chapter if doesn't exist
-        const babKey = `bab${chapterNum}`;
-        if (!chapterScores[babKey]) {
-            chapterScores[babKey] = {};
-        }
-        
-        const soalKey = `soal${problemNum}`;
-        const existingScore = chapterScores[babKey][soalKey] || 0;
-        
-        // Logika skor tertinggi
-        if (currentScore > existingScore) {
-            chapterScores[babKey][soalKey] = currentScore;
-            
-            // Hitung rata-rata semua soal di bab ini
-            const average = calculateChapterAverage(chapterScores[babKey]);
-            
-            // Update database
-            const { error: updateError } = await supabaseClient
-                .from('user_progress')
-                .update({ 
-                    chapter_scores: chapterScores,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('user_id', currentUser.id);
-            
-            if (updateError) throw updateError;
-            
-            // Update UI
-            scoreDisplay.textContent = `Tersimpan: ${currentScore}/100`;
-            scoreDisplay.style.background = 'linear-gradient(135deg, #22c55e, #4ade80)';
-            
-            alert(`✅ Skor tersimpan: ${currentScore}/100\n🏆 Skor tertinggi baru!\n📊 Rata-rata Bab ${chapterNum}: ${average}/100`);
-            
-        } else if (currentScore === existingScore) {
-            alert(`ℹ️ Skor Anda: ${currentScore}/100\n✅ Sudah tersimpan sebelumnya`);
-        } else {
-            alert(`ℹ️ Skor saat ini: ${currentScore}/100\n🏆 Skor tertinggi Anda: ${existingScore}/100\n\n⚠️ Skor tidak diupdate karena lebih rendah dari skor tertinggi.`);
-        }
-        
-    } catch (error) {
-        console.error('Error saving solution:', error);
-        alert('Gagal menyimpan jawaban: ' + error.message);
-    }
-}
-
-// Load saved scores when opening practice page
-async function loadSavedSolutions(chapterNum) {
-    if (!currentUser) return;
-    
-    try {
-        const { data: progress } = await supabaseClient
-            .from('user_progress')
-            .select('chapter_scores')
-            .eq('user_id', currentUser.id)
-            .single();
-        
-        const chapterScores = progress?.chapter_scores || {};
-        const babKey = `bab${chapterNum}`;
-        
-        if (chapterScores[babKey]) {
-            const babScores = chapterScores[babKey];
-            
-            // Update UI for each saved problem
-            Object.keys(babScores).forEach(soalKey => {
-                const problemNum = soalKey.replace('soal', '');
-                const problemId = `${chapterNum}-${problemNum}`;
-                const score = babScores[soalKey];
-                
-                // Update score badge
-                const scoreDisplay = document.getElementById(`score-${problemId}`);
-                if (scoreDisplay) {
-                    scoreDisplay.textContent = `Tersimpan: ${score}/100`;
-                    if (score >= 70) {
-                        scoreDisplay.style.background = 'linear-gradient(135deg, #22c55e, #4ade80)';
-                    } else if (score >= 40) {
-                        scoreDisplay.style.background = 'var(--text-muted)';
-                    } else {
-                        scoreDisplay.style.background = '#ef4444';
-                    }
-                }
-            });
-        }
-    } catch (error) {
-        console.error('Error loading solutions:', error);
-    }
 }
 
 function simulatePythonExecution(code, problemId) {
@@ -1119,186 +913,116 @@ function simulatePythonExecution(code, problemId) {
     
     try {
         switch(chapter) {
-            case 1:
-                output = simulateChapter1(code, problem);
-                break;
-            case 2:
-                output = simulateChapter2(code, problem);
-                break;
-            case 3:
-                output = simulateChapter3(code, problem);
-                break;
-            case 4:
-                output = simulateChapter4(code, problem);
-                break;
-            case 5:
-                output = simulateChapter5(code, problem);
-                break;
+            case 1: output = simulateChapter1(code, problem); break;
+            case 2: output = simulateChapter2(code, problem); break;
+            case 3: output = simulateChapter3(code, problem); break;
+            case 4: output = simulateChapter4(code, problem); break;
+            case 5: output = simulateChapter5(code, problem); break;
         }
-        
-        if (!output) {
-            output = 'Kode belum lengkap atau tidak sesuai dengan soal. Periksa kembali implementasi Anda.';
-        }
+        if (!output) output = 'Kode belum lengkap atau tidak sesuai dengan soal.';
     } catch (error) {
-        output = `Error dalam kode:\n${error.message}`;
+        output = `Error: ${error.message}`;
     }
     return { output };
 }
 
+// Simulation functions (simplified - tambahkan sesuai kebutuhan)
 function simulateChapter1(code, problem) {
-    switch(problem) {
-        case 1:
-            if (code.includes('kangkung') && code.includes('input') && code.includes('print')) {
-                return `Simulasi Soal 1.1:\nKeranjang kangkung: 2\nKeranjang wortel: 3\nKeranjang kol: 1\nHarga per keranjang (Rp): 50000\nBiaya transportasi (Rp): 20000\n\nPendapatan bersih: Rp 280,000.00`;
-            }
-            break;
-        case 2:
-            if (code.includes('9/5') && code.includes('273.15') && code.includes('input')) {
-                return `Simulasi Soal 1.2:\nSuhu (°C): 25\n25.0 °C = 77.00 °F = 298.15 K`;
-            }
-            break;
-        case 3:
-            if (code.includes('0.11') && code.includes('subtotal') && code.includes('ppn')) {
-                return `Simulasi Soal 1.3:\nNama barang 1: Buku\nHarga barang 1: Rp 50000\nJumlah barang 1: 2\nNama barang 2: Pensil\nHarga barang 2: Rp 5000\nJumlah barang 2: 5\n\nSubtotal: Rp 125,000.00\nPPN 11%: Rp 13,750.00\nTotal bayar: Rp 138,750.00`;
-            }
-            break;
-        case 4:
-            if (code.includes('if') && code.includes('tahun_target') && code.includes('tahun_lahir')) {
-                return `Simulasi Soal 1.4:\nTahun lahir: 2000\nTahun target: 2025\nUmur pada tahun 2025: 25 tahun\n\nSimulasi error:\nTahun lahir: 2010\nTahun target: 2005\nTahun target harus >= tahun lahir.`;
-            }
-            break;
-        case 5:
-            if (code.includes('rata') && code.includes('60') && code.includes('/3')) {
-                return `Simulasi Soal 1.5:\nNilai 1: 80\nNilai 2: 70\nNilai 3: 85\nRata-rata: 78.33 -> Lulus\n\nSimulasi kedua:\nNilai 1: 45\nNilai 2: 50\nNilai 3: 55\nRata-rata: 50.00 -> Tidak Lulus`;
-            }
-            break;
+    if (problem === 1 && code.includes('kangkung') && code.includes('input')) {
+        return `Simulasi:\nKeranjang kangkung: 2\nKeranjang wortel: 3\nKeranjang kol: 1\nHarga per keranjang: 50000\nPendapatan bersih: Rp 280,000`;
+    }
+    if (problem === 2 && code.includes('9/5') && code.includes('273.15')) {
+        return `Simulasi:\nSuhu (°C): 25\n25.0 °C = 77.00 °F = 298.15 K`;
+    }
+    if (problem === 3 && code.includes('0.11') && code.includes('ppn')) {
+        return `Simulasi:\nSubtotal: Rp 125,000\nPPN 11%: Rp 13,750\nTotal: Rp 138,750`;
+    }
+    if (problem === 4 && code.includes('if') && code.includes('tahun')) {
+        return `Simulasi:\nTahun lahir: 2000\nTahun target: 2025\nUmur: 25 tahun`;
+    }
+    if (problem === 5 && code.includes('/3') && code.includes('rata')) {
+        return `Simulasi:\nNilai 1: 80\nNilai 2: 70\nNilai 3: 85\nRata-rata: 78.33 -> Lulus`;
     }
     return '';
 }
 
 function simulateChapter2(code, problem) {
-    switch(problem) {
-        case 1:
-            if (code.includes('while') && code.includes('elif') && code.includes('indeks')) {
-                return `Simulasi Soal 2.1:\nMasukkan nilai (0-100): 150\nNilai tidak valid. Coba lagi.\nMasukkan nilai (0-100): 87\nIndeks: A`;
-            }
-            break;
-        case 2:
-            if (code.includes('range') && code.includes('i % 5') && code.includes('Istirahat')) {
-                return `Simulasi Soal 2.2:\nBerapa tiket? 7\nNomor Antrian: 1\nNomor Antrian: 2\nNomor Antrian: 3\nNomor Antrian: 4\nNomor Antrian: 5\n----- Istirahat Operator -----\nNomor Antrian: 6\nNomor Antrian: 7`;
-            }
-            break;
-        case 3:
-            if (code.includes('random') && code.includes('kesempatan') && code.includes('tebakan')) {
-                return `Simulasi Soal 2.3:\nAngka rahasia: 42\nTebakan ke-1: 50\nTerlalu besar.\nTebakan ke-2: 40\nTerlalu kecil.\nTebakan ke-3: 42\nBenar! Tebakan ke-3`;
-            }
-            break;
-        case 4:
-            if (code.includes('split()') && code.includes('% 2') && code.includes('genap')) {
-                return `Simulasi Soal 2.4:\nMasukkan angka dipisah spasi: 1 2 3 4 5 6 7 8\nAngka genap: [2, 4, 6, 8]\nTotal genap: 4`;
-            }
-            break;
-        case 5:
-            if (code.includes('while True') && code.includes('pilih') && code.includes('break')) {
-                return `Simulasi Soal 2.5:\n1.+ 2.- 3.* 4./ 5.Keluar\nPilih: 1\nAngka 1: 10\nAngka 2: 5\n15.0\n1.+ 2.- 3.* 4./ 5.Keluar\nPilih: 5\nTerima kasih.`;
-            }
-            break;
+    if (problem === 1 && code.includes('while') && code.includes('elif')) {
+        return `Simulasi:\nMasukkan nilai: 87\nIndeks: A`;
+    }
+    if (problem === 2 && code.includes('range') && code.includes('% 5')) {
+        return `Simulasi:\nNomor Antrian: 1-5\n----- Istirahat -----\nNomor Antrian: 6-7`;
+    }
+    if (problem === 3 && code.includes('random') && code.includes('tebakan')) {
+        return `Simulasi:\nTebakan benar di percobaan ke-3!`;
+    }
+    if (problem === 4 && code.includes('split()') && code.includes('% 2')) {
+        return `Simulasi:\nAngka genap: [2, 4, 6, 8]\nTotal: 4`;
+    }
+    if (problem === 5 && code.includes('while True') && code.includes('break')) {
+        return `Simulasi:\nKalkulator berjalan dengan baik!`;
     }
     return '';
 }
 
 function simulateChapter3(code, problem) {
-    switch(problem) {
-        case 1:
-            if (code.includes('len(pesan)') && code.includes('indeks')) {
-                return `Simulasi Soal 3.1:\nPesan: HELLO\nIndeks k (0-based): 1\nKarakter: 'E'\n\nSimulasi error:\nPesan: HELLO\nIndeks k (0-based): 10\nIndeks tidak valid.`;
-            }
-            break;
-        case 2:
-            if (code.includes('[::-1]') && code.includes('lower()') && code.includes('YA')) {
-                return `Simulasi Soal 3.2:\nKata: KATAK\nYA\n\nSimulasi kedua:\nKata: PYTHON\nTIDAK`;
-            }
-            break;
-        case 3:
-            if (code.includes('split(",")') && code.includes('split(":")') && code.includes('items')) {
-                return `Simulasi Soal 3.3:\nMasukkan item (nama:harga, ...): susu:15000,roti:8000,telur:25000\nDaftar: [('susu', 15000.0), ('roti', 8000.0), ('telur', 25000.0)]\nTotal: Rp 48,000.00`;
-            }
-            break;
-        case 4:
-            if (code.includes('set') && code.includes('unik') && code.includes('split()')) {
-                return `Simulasi Soal 3.4:\nKalimat: Python adalah bahasa pemrograman yang mudah dipelajari dan Python sangat populer\nJumlah kata unik: 8\nKata unik: ['adalah', 'bahasa', 'dan', 'dipelajari', 'mudah', 'pemrograman', 'populer', 'python', 'sangat', 'yang']`;
-            }
-            break;
-        case 5:
-            if (code.includes('copy()') && code.includes('sort') && code.includes('reverse=True')) {
-                return `Simulasi Soal 3.5:\nNilai (spasi): 78 92 65 88 79 95 73\nTop 3: [95, 92, 88]`;
-            }
-            break;
+    if (problem === 1 && code.includes('len(pesan)')) {
+        return `Simulasi:\nPesan: HELLO\nIndeks 1: E`;
+    }
+    if (problem === 2 && code.includes('[::-1]') && code.includes('lower()')) {
+        return `Simulasi:\nKata: KATAK\nYA (Palindrom)`;
+    }
+    if (problem === 3 && code.includes('split(",")') && code.includes('split(":")')) {
+        return `Simulasi:\nTotal: Rp 48,000`;
+    }
+    if (problem === 4 && code.includes('set') && code.includes('unik')) {
+        return `Simulasi:\nJumlah kata unik: 8`;
+    }
+    if (problem === 5 && code.includes('copy()') && code.includes('sort')) {
+        return `Simulasi:\nTop 3: [95, 92, 88]`;
     }
     return '';
 }
 
 function simulateChapter4(code, problem) {
-    switch(problem) {
-        case 1:
-            if (code.includes('[[0') && code.includes('range(c)') && code.includes('range(r)')) {
-                return `Simulasi Soal 4.1:\nBaris R: 3\nKolom C: 4\n[0, 0, 0, 0]\n[0, 0, 0, 0]\n[0, 0, 0, 0]`;
-            }
-            break;
-        case 2:
-            if (code.includes("[['-'") && code.includes('join') && code.includes('papan[i][j]')) {
-                return `Simulasi Soal 4.2:\nPapan awal:\n- - -\n- - -\n- - -\nBaris (0-2): 1\nKolom (0-2): 1\nPapan setelah move:\n- - -\n- X -\n- - -`;
-            }
-            break;
-        case 3:
-            if (code.includes('sum(row)') && code.includes('enumerate')) {
-                return `Simulasi Soal 4.3:\nR C: 3 4\n10 20 30 40\n15 25 35 45\n5 10 15 20\nTotal tim 1: 100\nTotal tim 2: 120\nTotal tim 3: 50`;
-            }
-            break;
-        case 4:
-            if (code.includes('(i + j) % 2') && code.includes('"# "') && code.includes('range(n)')) {
-                return `Simulasi Soal 4.4:\nN: 4\n# # \n # #\n# # \n # #`;
-            }
-            break;
-        case 5:
-            if (code.includes('mat[i][j] == x') && code.includes('found') && code.includes('break')) {
-                return `Simulasi Soal 4.5:\nR C: 3 3\n1 2 3\n4 5 6\n7 8 9\nCari angka X: 5\nDitemukan di: 1, 1\n\nSimulasi tidak ditemukan:\nCari angka X: 15\nTidak ditemukan`;
-            }
-            break;
+    if (problem === 1 && code.includes('[[0')) {
+        return `Simulasi:\nPeta 3x4 berhasil dibuat!`;
+    }
+    if (problem === 2 && code.includes("[['-'") && code.includes('join')) {
+        return `Simulasi:\nPapan Tic-Tac-Toe berhasil!`;
+    }
+    if (problem === 3 && code.includes('sum(row)')) {
+        return `Simulasi:\nTotal per tim dihitung!`;
+    }
+    if (problem === 4 && code.includes('(i + j) % 2')) {
+        return `Simulasi:\nPola papan catur berhasil!`;
+    }
+    if (problem === 5 && code.includes('mat[i][j] == x')) {
+        return `Simulasi:\nDitemukan di posisi (1, 1)`;
     }
     return '';
 }
 
 function simulateChapter5(code, problem) {
-    switch(problem) {
-        case 1:
-            if (code.includes('def hitung_total') && code.includes('0.11') && code.includes('500000')) {
-                return `Simulasi Soal 5.1:\nSubtotal: Rp 600000\nTotal bayar: Rp 632,700.00\n(Dengan diskon 5% karena >= 500000)\n\nSimulasi tanpa diskon:\nSubtotal: Rp 200000\nTotal bayar: Rp 222,000.00`;
-            }
-            break;
-        case 2:
-            if (code.includes('def cek_umur') && code.includes('minimal=15') && code.includes('return')) {
-                return `Simulasi Soal 5.2:\nUmur: 17\nMemenuhi syarat.\n\nSimulasi kedua:\nUmur: 12\nBelum memenuhi syarat.`;
-            }
-            break;
-        case 3:
-            if (code.includes('def kalkulator') && code.includes('Error') && code.includes('return')) {
-                return `Simulasi Soal 5.3:\nA: 10\nB: 3\nOperasi (+-*/): +\n13.0\n\nSimulasi pembagian nol:\nA: 10\nB: 0\nOperasi (+-*/): /\nError: pembagian 0`;
-            }
-            break;
-        case 4:
-            if (code.includes('def cetak_papan') && code.includes('def ganti_giliran') && code.includes("'|'")) {
-                return `Simulasi Soal 5.4:\nPapan awal:\n- | - | -\n- | - | -\n- | - | -\nBaris: 0\nKolom: 0\nPapan setelah move:\nX | - | -\n- | - | -\n- | - | -\nGiliran selanjutnya: O`;
-            }
-            break;
-        case 5:
-            if (code.includes('def rata2') && code.includes('if not nums') && code.includes('return None')) {
-                return `Simulasi Soal 5.5:\nMasukkan angka (spasi): 10 20 30 40 50\nRata-rata: 30.00\n\nSimulasi data kosong:\nMasukkan angka (spasi): \nTidak ada data.`;
-            }
-            break;
+    if (problem === 1 && code.includes('def hitung_total') && code.includes('0.11')) {
+        return `Simulasi:\nTotal dengan PPN dan diskon: Rp 632,700`;
+    }
+    if (problem === 2 && code.includes('def cek_umur') && code.includes('minimal=15')) {
+        return `Simulasi:\nMemenuhi syarat!`;
+    }
+    if (problem === 3 && code.includes('def kalkulator') && code.includes('Error')) {
+        return `Simulasi:\nHasil: 13.0`;
+    }
+    if (problem === 4 && code.includes('def cetak_papan') && code.includes('def ganti_giliran')) {
+        return `Simulasi:\nFungsi berhasil!`;
+    }
+    if (problem === 5 && code.includes('def rata2') && code.includes('if not nums')) {
+        return `Simulasi:\nRata-rata: 30.00`;
     }
     return '';
 }
+
+// ==================== SCORING ====================
 
 function calculateScore(code, problemId) {
     let score = 0;
@@ -1306,219 +1030,43 @@ function calculateScore(code, problemId) {
     const requirements = getRequirements(chapter, problem);
     
     requirements.forEach(req => {
-        if (code.includes(req.keyword)) {
-            score += req.points;
-        }
+        if (code.includes(req.keyword)) score += req.points;
     });
     
     if (code.includes('#')) score += 10;
     if (code.includes('print(f')) score += 5;
-    
     return Math.min(score, 100);
 }
 
-// ==================== SCORING REQUIREMENTS ====================
-
 function getRequirements(chapter, problem) {
-    const requirements = {
-        1: {
-            1: [
-                { keyword: 'kangkung', points: 15 },
-                { keyword: 'input', points: 25 },
-                { keyword: 'int(', points: 15 },
-                { keyword: 'float(', points: 15 },
-                { keyword: 'print', points: 20 },
-                { keyword: '*', points: 10 }
-            ],
-            2: [
-                { keyword: '9/5', points: 25 },
-                { keyword: '273.15', points: 25 },
-                { keyword: 'float(', points: 20 },
-                { keyword: 'input', points: 20 },
-                { keyword: 'print', points: 10 }
-            ],
-            3: [
-                { keyword: '0.11', points: 25 },
-                { keyword: 'subtotal', points: 20 },
-                { keyword: 'ppn', points: 20 },
-                { keyword: 'input', points: 15 },
-                { keyword: 'print', points: 10 },
-                { keyword: '*', points: 10 }
-            ],
-            4: [
-                { keyword: 'if', points: 25 },
-                { keyword: 'tahun_target', points: 20 },
-                { keyword: 'tahun_lahir', points: 20 },
-                { keyword: '<', points: 15 },
-                { keyword: 'else', points: 10 },
-                { keyword: 'print', points: 10 }
-            ],
-            5: [
-                { keyword: '/3', points: 25 },
-                { keyword: 'rata', points: 20 },
-                { keyword: '>=', points: 20 },
-                { keyword: '60', points: 15 },
-                { keyword: 'if', points: 10 },
-                { keyword: 'print', points: 10 }
-            ]
-        },
-        2: {
-            1: [
-                { keyword: 'while', points: 25 },
-                { keyword: 'elif', points: 25 },
-                { keyword: 'indeks', points: 20 },
-                { keyword: '>=', points: 15 },
-                { keyword: 'break', points: 10 },
-                { keyword: 'print', points: 5 }
-            ],
-            2: [
-                { keyword: 'range', points: 25 },
-                { keyword: '% 5', points: 25 },
-                { keyword: 'Istirahat', points: 20 },
-                { keyword: 'for', points: 15 },
-                { keyword: 'if', points: 10 },
-                { keyword: 'print', points: 5 }
-            ],
-            3: [
-                { keyword: 'random', points: 25 },
-                { keyword: 'kesempatan', points: 20 },
-                { keyword: 'tebakan', points: 20 },
-                { keyword: 'elif', points: 15 },
-                { keyword: 'break', points: 10 },
-                { keyword: 'for', points: 10 }
-            ],
-            4: [
-                { keyword: 'split()', points: 25 },
-                { keyword: '% 2', points: 25 },
-                { keyword: 'genap', points: 20 },
-                { keyword: '[x for x', points: 15 },
-                { keyword: 'len', points: 10 },
-                { keyword: 'print', points: 5 }
-            ],
-            5: [
-                { keyword: 'while True', points: 25 },
-                { keyword: 'pilih', points: 20 },
-                { keyword: 'break', points: 20 },
-                { keyword: 'elif', points: 15 },
-                { keyword: 'float', points: 10 },
-                { keyword: 'print', points: 10 }
-            ]
-        },
-        3: {
-            1: [
-                { keyword: 'len(pesan)', points: 30 },
-                { keyword: 'indeks', points: 25 },
-                { keyword: 'if', points: 20 },
-                { keyword: '<=', points: 15 },
-                { keyword: 'else', points: 10 }
-            ],
-            2: [
-                { keyword: '[::-1]', points: 30 },
-                { keyword: 'lower()', points: 25 },
-                { keyword: 'YA', points: 20 },
-                { keyword: 'if', points: 15 },
-                { keyword: 'else', points: 10 }
-            ],
-            3: [
-                { keyword: 'split(",")', points: 25 },
-                { keyword: 'split(":")', points: 25 },
-                { keyword: 'items', points: 20 },
-                { keyword: 'append', points: 15 },
-                { keyword: 'total', points: 10 },
-                { keyword: 'strip', points: 5 }
-            ],
-            4: [
-                { keyword: 'set', points: 30 },
-                { keyword: 'unik', points: 25 },
-                { keyword: 'split()', points: 20 },
-                { keyword: 'lower()', points: 15 },
-                { keyword: 'len', points: 10 }
-            ],
-            5: [
-                { keyword: 'copy()', points: 25 },
-                { keyword: 'sort', points: 25 },
-                { keyword: 'reverse=True', points: 25 },
-                { keyword: '[:3]', points: 15 },
-                { keyword: 'split()', points: 10 }
-            ]
-        },
-        4: {
-            1: [
-                { keyword: '[[0', points: 30 },
-                { keyword: 'range(c)', points: 25 },
-                { keyword: 'range(r)', points: 20 },
-                { keyword: 'for _', points: 15 },
-                { keyword: 'print', points: 10 }
-            ],
-            2: [
-                { keyword: "[['-'", points: 25 },
-                { keyword: 'join', points: 25 },
-                { keyword: 'papan[i][j]', points: 25 },
-                { keyword: 'int(input', points: 15 },
-                { keyword: 'if', points: 10 }
-            ],
-            3: [
-                { keyword: 'sum(row)', points: 30 },
-                { keyword: 'enumerate', points: 25 },
-                { keyword: 'map(int', points: 20 },
-                { keyword: 'append', points: 15 },
-                { keyword: 'Total tim', points: 10 }
-            ],
-            4: [
-                { keyword: '(i + j) % 2', points: 30 },
-                { keyword: '"# "', points: 25 },
-                { keyword: 'range(n)', points: 20 },
-                { keyword: 'for i', points: 15 },
-                { keyword: 'for j', points: 10 }
-            ],
-            5: [
-                { keyword: 'mat[i][j] == x', points: 30 },
-                { keyword: 'found', points: 25 },
-                { keyword: 'break', points: 20 },
-                { keyword: 'for i in range', points: 15 },
-                { keyword: 'for j in range', points: 10 }
-            ]
-        },
-        5: {
-            1: [
-                { keyword: 'def hitung_total', points: 30 },
-                { keyword: '0.11', points: 20 },
-                { keyword: '500000', points: 20 },
-                { keyword: 'return', points: 20 },
-                { keyword: 'if', points: 10 }
-            ],
-            2: [
-                { keyword: 'def cek_umur', points: 30 },
-                { keyword: 'minimal=15', points: 25 },
-                { keyword: 'return', points: 25 },
-                { keyword: '>=', points: 15 },
-                { keyword: 'if', points: 5 }
-            ],
-            3: [
-                { keyword: 'def kalkulator', points: 30 },
-                { keyword: 'Error', points: 25 },
-                { keyword: 'return', points: 20 },
-                { keyword: 'if', points: 15 },
-                { keyword: 'elif', points: 10 }
-            ],
-            4: [
-                { keyword: 'def cetak_papan', points: 25 },
-                { keyword: 'def ganti_giliran', points: 25 },
-                { keyword: "|", points: 20 },
-                { keyword: 'return', points: 15 },
-                { keyword: 'for row', points: 15 }
-            ],
-            5: [
-                { keyword: 'def rata2', points: 30 },
-                { keyword: 'if not nums', points: 25 },
-                { keyword: 'return None', points: 25 },
-                { keyword: 'sum', points: 15 },
-                { keyword: 'len', points: 5 }
-            ]
-        }
+    const reqs = {
+        1: {1: [{keyword: 'kangkung', points: 15}, {keyword: 'input', points: 25}, {keyword: 'print', points: 20}],
+            2: [{keyword: '9/5', points: 25}, {keyword: '273.15', points: 25}, {keyword: 'input', points: 20}],
+            3: [{keyword: '0.11', points: 25}, {keyword: 'ppn', points: 20}, {keyword: 'print', points: 15}],
+            4: [{keyword: 'if', points: 25}, {keyword: 'tahun', points: 20}, {keyword: 'print', points: 15}],
+            5: [{keyword: '/3', points: 25}, {keyword: 'rata', points: 20}, {keyword: '>=', points: 15}]},
+        2: {1: [{keyword: 'while', points: 25}, {keyword: 'elif', points: 25}, {keyword: 'break', points: 15}],
+            2: [{keyword: 'range', points: 25}, {keyword: '% 5', points: 25}, {keyword: 'for', points: 15}],
+            3: [{keyword: 'random', points: 25}, {keyword: 'tebakan', points: 20}, {keyword: 'for', points: 15}],
+            4: [{keyword: 'split()', points: 25}, {keyword: '% 2', points: 25}, {keyword: 'genap', points: 15}],
+            5: [{keyword: 'while True', points: 25}, {keyword: 'break', points: 20}, {keyword: 'elif', points: 15}]},
+        3: {1: [{keyword: 'len(pesan)', points: 30}, {keyword: 'indeks', points: 25}, {keyword: 'if', points: 15}],
+            2: [{keyword: '[::-1]', points: 30}, {keyword: 'lower()', points: 25}, {keyword: 'YA', points: 15}],
+            3: [{keyword: 'split(",")', points: 25}, {keyword: 'split(":")', points: 25}, {keyword: 'items', points: 15}],
+            4: [{keyword: 'set', points: 30}, {keyword: 'unik', points: 25}, {keyword: 'split()', points: 15}],
+            5: [{keyword: 'copy()', points: 25}, {keyword: 'sort', points: 25}, {keyword: 'reverse=True', points: 20}]},
+        4: {1: [{keyword: '[[0', points: 30}, {keyword: 'range(c)', points: 25}, {keyword: 'range(r)', points: 15}],
+            2: [{keyword: "[['-'", points: 25}, {keyword: 'join', points: 25}, {keyword: 'papan', points: 15}],
+            3: [{keyword: 'sum(row)', points: 30}, {keyword: 'enumerate', points: 25}, {keyword: 'map(int', points: 15}],
+            4: [{keyword: '(i + j) % 2', points: 30}, {keyword: '"# "', points: 25}, {keyword: 'range(n)', points: 15}],
+            5: [{keyword: 'mat[i][j] == x', points: 30}, {keyword: 'found', points: 25}, {keyword: 'break', points: 15}]},
+        5: {1: [{keyword: 'def hitung_total', points: 30}, {keyword: '0.11', points: 20}, {keyword: 'return', points: 20}],
+            2: [{keyword: 'def cek_umur', points: 30}, {keyword: 'minimal=15', points: 25}, {keyword: 'return', points: 20}],
+            3: [{keyword: 'def kalkulator', points: 30}, {keyword: 'Error', points: 25}, {keyword: 'return', points: 15}],
+            4: [{keyword: 'def cetak_papan', points: 25}, {keyword: 'def ganti_giliran', points: 25}, {keyword: 'return', points: 15}],
+            5: [{keyword: 'def rata2', points: 30}, {keyword: 'if not nums', points: 25}, {keyword: 'return None', points: 20}]}
     };
-    
-    return requirements[chapter]?.[problem] || [];
+    return reqs[chapter]?.[problem] || [];
 }
 
 function resetCode(problemId) {
@@ -1545,174 +1093,58 @@ function showMessage(container, type, message) {
 // ==================== DRAG & DROP ====================
 
 let draggedElement = null;
-
 const dragDropProblems = [
-    {
-        title: "Menyusun Fungsi Hitung Rata-rata",
-        blocks: [
-            { id: '1', code: 'def hitung_rata(nilai):' },
-            { id: '2', code: '    total = sum(nilai)' },
-            { id: '3', code: '    return total / len(nilai)' },
-            { id: '4', code: 'nilai_siswa = [80, 90, 75, 85]' },
-            { id: '5', code: 'print(f"Rata-rata: {hitung_rata(nilai_siswa)}")' }
-        ],
-        correctOrder: ['4', '1', '2', '3', '5'],
-        hint: "deklarasi variabel → definisi fungsi → pemanggilan fungsi"
-    },
-    {
-        title: "Menyusun Loop dengan Kondisi",
-        blocks: [
-            { id: '1', code: 'for i in range(5):' },
-            { id: '2', code: '    if i % 2 == 0:' },
-            { id: '3', code: '        print("Genap")' },
-            { id: '4', code: '    print(f"Angka: {i}")' }
-        ],
-        correctOrder: ['1', '2', '3', '4'],
-        hint: "loop → kondisi → aksi kondisi → aksi loop"
-    },
-    {
-        title: "Menyusun Program Input Output",
-        blocks: [
-            { id: '1', code: 'nama = input("Nama: ")' },
-            { id: '2', code: 'umur = int(input("Umur: "))' },
-            { id: '3', code: 'print(f"Halo {nama}!")' },
-            { id: '4', code: 'print(f"Umur: {umur} tahun")' }
-        ],
-        correctOrder: ['1', '2', '3', '4'],
-        hint: "input string → input dengan casting → output data"
-    },
-    {
-        title: "Menyusun Fungsi Faktorial",
-        blocks: [
-            { id: '1', code: 'def faktorial(n):' },
-            { id: '2', code: '    if n <= 1:' },
-            { id: '3', code: '        return 1' },
-            { id: '4', code: '    return n * faktorial(n-1)' },
-            { id: '5', code: 'print(faktorial(5))' }
-        ],
-        correctOrder: ['1', '2', '3', '4', '5'],
-        hint: "definisi fungsi → base case → recursive case → pemanggilan"
-    },
-    {
-        title: "Menyusun Program List",
-        blocks: [
-            { id: '1', code: 'angka = [3, 1, 4, 1, 5]' },
-            { id: '2', code: 'angka.sort()' },
-            { id: '3', code: 'angka.append(9)' },
-            { id: '4', code: 'print(angka)' }
-        ],
-        correctOrder: ['1', '2', '3', '4'],
-        hint: "deklarasi list → sort → modifikasi → output"
-    }
+    {title: "Menyusun Fungsi", blocks: [{id:'1',code:'def hitung_rata(nilai):'},{id:'2',code:'    total = sum(nilai)'},{id:'3',code:'    return total / len(nilai)'},{id:'4',code:'nilai_siswa = [80, 90, 75, 85]'},{id:'5',code:'print(f"Rata-rata: {hitung_rata(nilai_siswa)}")'}], correctOrder: ['4','1','2','3','5'], hint: "variabel → fungsi → panggil"},
+    {title: "Loop dengan Kondisi", blocks: [{id:'1',code:'for i in range(5):'},{id:'2',code:'    if i % 2 == 0:'},{id:'3',code:'        print("Genap")'},{id:'4',code:'    print(f"Angka: {i}")'}], correctOrder: ['1','2','3','4'], hint: "loop → if → aksi"},
 ];
-
 let currentProblemIndex = 0;
 
 function initDragAndDrop() {
-    const draggables = document.querySelectorAll('.code-block');
-    const dropZones = document.querySelectorAll('.drag-zone');
-
-    draggables.forEach(draggable => {
-        draggable.addEventListener('dragstart', handleDragStart);
-        draggable.addEventListener('dragend', handleDragEnd);
+    document.querySelectorAll('.code-block').forEach(el => {
+        el.addEventListener('dragstart', function(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+        });
+        el.addEventListener('dragend', function() {
+            this.classList.remove('dragging');
+        });
     });
-
-    dropZones.forEach(zone => {
-        zone.addEventListener('dragover', handleDragOver);
-        zone.addEventListener('drop', handleDrop);
-        zone.addEventListener('dragleave', handleDragLeave);
-        zone.addEventListener('dragenter', handleDragEnter);
-    });
-}
-
-function handleDragStart(e) {
-    draggedElement = this;
-    this.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', this.innerHTML);
-}
-
-function handleDragEnd(e) {
-    this.classList.remove('dragging');
     document.querySelectorAll('.drag-zone').forEach(zone => {
-        zone.classList.remove('drag-over');
+        zone.addEventListener('dragover', e => { e.preventDefault(); });
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            if (draggedElement) {
+                const emptyMsg = this.querySelector('.empty-message');
+                if (emptyMsg) emptyMsg.remove();
+                const clone = draggedElement.cloneNode(true);
+                this.appendChild(clone);
+                if (draggedElement.parentElement.id === 'solution-area') draggedElement.remove();
+            }
+        });
     });
-}
-
-function handleDragOver(e) {
-    if (e.preventDefault) {
-        e.preventDefault();
-    }
-    e.dataTransfer.dropEffect = 'move';
-    return false;
-}
-
-function handleDragEnter(e) {
-    this.classList.add('drag-over');
-}
-
-function handleDragLeave(e) {
-    this.classList.remove('drag-over');
-}
-
-function handleDrop(e) {
-    if (e.stopPropagation) {
-        e.stopPropagation();
-    }
-
-    this.classList.remove('drag-over');
-
-    if (draggedElement !== this) {
-        const emptyMsg = this.querySelector('.empty-message');
-        if (emptyMsg) {
-            emptyMsg.remove();
-        }
-
-        const clone = draggedElement.cloneNode(true);
-        clone.addEventListener('dragstart', handleDragStart);
-        clone.addEventListener('dragend', handleDragEnd);
-        this.appendChild(clone);
-        
-        if (draggedElement.parentElement.id === 'solution-area') {
-            draggedElement.remove();
-        }
-    }
-
-    return false;
 }
 
 async function checkDragSolution() {
-    const solutionArea = document.getElementById('solution-area');
-    const blocks = solutionArea.querySelectorAll('.code-block');
+    const blocks = document.getElementById('solution-area').querySelectorAll('.code-block');
     const feedback = document.getElementById('drag-feedback');
     
     if (blocks.length === 0) {
-        feedback.textContent = 'Belum ada kode yang disusun! Drag blok kode ke area solusi.';
+        feedback.textContent = 'Belum ada kode!';
         feedback.className = 'feedback-area show incorrect';
         return;
     }
 
-    const userOrder = Array.from(blocks).map(block => block.dataset.id);
+    const userOrder = Array.from(blocks).map(b => b.dataset.id);
     const problem = dragDropProblems[currentProblemIndex];
     const isCorrect = JSON.stringify(userOrder) === JSON.stringify(problem.correctOrder);
     
     if (isCorrect) {
-        feedback.textContent = '🎉 Sempurna! Kode Anda sudah benar!';
+        feedback.textContent = '🎉 Sempurna!';
         feedback.className = 'feedback-area show correct';
-        
-        blocks.forEach((block, index) => {
-            setTimeout(() => {
-                block.style.animation = 'pulse 0.5s ease';
-            }, index * 100);
-        });
-        
-        // Update stats
         await updateDragDropStats(true);
     } else {
         feedback.textContent = `❌ Belum tepat. Hint: ${problem.hint}`;
         feedback.className = 'feedback-area show incorrect';
-        
-        // Update stats
         await updateDragDropStats(false);
     }
 }
@@ -1725,115 +1157,30 @@ function resetDragExercise() {
     
     const solutionArea = document.getElementById('solution-area');
     const codeBlocksArea = document.getElementById('code-blocks');
-    const feedback = document.getElementById('drag-feedback');
     
-    const blocksInSolution = solutionArea.querySelectorAll('.code-block');
-    blocksInSolution.forEach(block => block.remove());
-    solutionArea.innerHTML = '<h3>Area Solusi (Drag di sini)</h3><p class="empty-message">Drag blok kode ke sini untuk menyusun program</p>';
+    solutionArea.querySelectorAll('.code-block').forEach(b => b.remove());
+    solutionArea.innerHTML = '<h3>Area Solusi (Drag di sini)</h3><p class="empty-message">Drag blok kode ke sini</p>';
     
-    feedback.className = 'feedback-area';
-    feedback.textContent = '';
+    document.getElementById('drag-feedback').className = 'feedback-area';
     
     codeBlocksArea.innerHTML = '<h3>Blok Kode Tersedia</h3>';
-    const shuffledBlocks = [...problem.blocks].sort(() => Math.random() - 0.5);
-    
-    shuffledBlocks.forEach(item => {
+    const shuffled = [...problem.blocks].sort(() => Math.random() - 0.5);
+    shuffled.forEach(item => {
         const block = document.createElement('div');
         block.className = 'code-block';
         block.draggable = true;
         block.dataset.id = item.id;
         block.innerHTML = `<code>${item.code}</code>`;
-        
-        block.addEventListener('dragstart', handleDragStart);
-        block.addEventListener('dragend', handleDragEnd);
-        
-        block.addEventListener('touchstart', handleTouchStart, { passive: false });
-        block.addEventListener('touchmove', handleTouchMove, { passive: false });
-        block.addEventListener('touchend', handleTouchEnd, { passive: false });
         codeBlocksArea.appendChild(block);
     });
+    
+    setTimeout(() => initDragAndDrop(), 100);
 }
 
-// Touch handlers for mobile
-function handleTouchStart(e) {
-    e.preventDefault();
-    draggedElement = this;
-    this.classList.add('dragging');
-    this.style.opacity = '0.5';
-}
-
-function handleTouchMove(e) {
-    e.preventDefault();
-    if (!draggedElement) return;
-    
-    const touch = e.touches[0];
-    const afterElement = getDragAfterElement(document.getElementById('solution-area'), touch.clientY);
-    const dropZone = document.getElementById('solution-area');
-    
-    const rect = dropZone.getBoundingClientRect();
-    if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
-        touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-        dropZone.classList.add('drag-over');
-    } else {
-        dropZone.classList.remove('drag-over');
-    }
-}
-
-function handleTouchEnd(e) {
-    e.preventDefault();
-    if (!draggedElement) return;
-    
-    const touch = e.changedTouches[0];
-    const dropZone = document.getElementById('solution-area');
-    const rect = dropZone.getBoundingClientRect();
-    
-    draggedElement.style.opacity = '';
-    draggedElement.classList.remove('dragging');
-    dropZone.classList.remove('drag-over');
-    
-    if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
-        touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-        
-        const emptyMsg = dropZone.querySelector('.empty-message');
-        if (emptyMsg) emptyMsg.remove();
-        
-        const clone = draggedElement.cloneNode(true);
-        clone.addEventListener('touchstart', handleTouchStart, { passive: false });
-        clone.addEventListener('touchmove', handleTouchMove, { passive: false });
-        clone.addEventListener('touchend', handleTouchEnd, { passive: false });
-        clone.addEventListener('dragstart', handleDragStart);
-        clone.addEventListener('dragend', handleDragEnd);
-        
-        dropZone.appendChild(clone);
-        
-        if (draggedElement.parentElement.id === 'solution-area') {
-            draggedElement.remove();
-        }
-    }
-    
-    draggedElement = null;
-}
-
-function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.code-block:not(.dragging)')];
-    
-    return draggableElements.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        
-        if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-        } else {
-            return closest;
-        }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
-
-// ==================== CANVAS VISUALIZATION ====================
+// ==================== CANVAS ====================
 
 const canvas = document.getElementById('sortCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
-
 let array = [];
 let comparisons = 0;
 let swaps = 0;
@@ -1841,13 +1188,8 @@ let isSorting = false;
 
 function generateRandomArray() {
     if (isSorting) return;
-    
     array = [];
-    const arraySize = 40;
-    for (let i = 0; i < arraySize; i++) {
-        array.push(Math.floor(Math.random() * 350) + 20);
-    }
-    
+    for (let i = 0; i < 40; i++) array.push(Math.floor(Math.random() * 350) + 20);
     comparisons = 0;
     swaps = 0;
     updateStats();
@@ -1857,18 +1199,11 @@ function generateRandomArray() {
 
 function drawArray(colorArray = []) {
     if (!ctx) return;
-    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     const barWidth = canvas.width / array.length;
-    
     for (let i = 0; i < array.length; i++) {
         ctx.fillStyle = colorArray[i] || '#3b82f6';
         ctx.fillRect(i * barWidth, canvas.height - array[i], barWidth - 2, array[i]);
-        
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '10px Arial';
-        ctx.fillText(array[i], i * barWidth + 2, canvas.height - array[i] - 5);
     }
 }
 
@@ -1882,128 +1217,27 @@ function sleep(ms) {
 }
 
 async function bubbleSort() {
-    const n = array.length;
-    for (let i = 0; i < n - 1; i++) {
-        for (let j = 0; j < n - i - 1; j++) {
+    for (let i = 0; i < array.length - 1; i++) {
+        for (let j = 0; j < array.length - i - 1; j++) {
             if (!isSorting) return;
-            
             comparisons++;
             updateStats();
-            
-            const colorArray = array.map((_, idx) => {
-                if (idx === j || idx === j + 1) return '#ef4444';
-                if (idx >= n - i) return '#22c55e';
-                return '#3b82f6';
-            });
-            drawArray(colorArray);
+            drawArray(array.map((_, idx) => idx === j || idx === j + 1 ? '#ef4444' : '#3b82f6'));
             await sleep(50);
-            
             if (array[j] > array[j + 1]) {
                 [array[j], array[j + 1]] = [array[j + 1], array[j]];
                 swaps++;
-                updateStats();
             }
         }
     }
-    
-    drawArray(array.map(() => '#22c55e'));
-}
-
-async function selectionSort() {
-    const n = array.length;
-    for (let i = 0; i < n - 1; i++) {
-        if (!isSorting) return;
-        
-        let minIdx = i;
-        for (let j = i + 1; j < n; j++) {
-            if (!isSorting) return;
-            
-            comparisons++;
-            updateStats();
-            
-            const colorArray = array.map((_, idx) => {
-                if (idx === minIdx) return '#f59e0b';
-                if (idx === j) return '#ef4444';
-                if (idx < i) return '#22c55e';
-                return '#3b82f6';
-            });
-            drawArray(colorArray);
-            await sleep(50);
-            
-            if (array[j] < array[minIdx]) {
-                minIdx = j;
-            }
-        }
-        
-        if (minIdx !== i) {
-            [array[i], array[minIdx]] = [array[minIdx], array[i]];
-            swaps++;
-            updateStats();
-        }
-    }
-    
-    drawArray(array.map(() => '#22c55e'));
-}
-
-async function insertionSort() {
-    const n = array.length;
-    for (let i = 1; i < n; i++) {
-        if (!isSorting) return;
-        
-        let key = array[i];
-        let j = i - 1;
-        
-        while (j >= 0 && array[j] > key) {
-            if (!isSorting) return;
-            
-            comparisons++;
-            updateStats();
-            
-            const colorArray = array.map((_, idx) => {
-                if (idx === j || idx === j + 1) return '#ef4444';
-                if (idx < i) return '#22c55e';
-                return '#3b82f6';
-            });
-            drawArray(colorArray);
-            await sleep(50);
-            
-            array[j + 1] = array[j];
-            j--;
-            swaps++;
-            updateStats();
-        }
-        
-        array[j + 1] = key;
-    }
-    
     drawArray(array.map(() => '#22c55e'));
 }
 
 async function startSorting() {
-    if (isSorting) return;
-    if (array.length === 0) {
-        generateRandomArray();
-    }
-    
+    if (isSorting || array.length === 0) return;
     isSorting = true;
-    const algorithm = document.getElementById('sortAlgorithm').value;
     document.getElementById('sortStatus').textContent = 'Sorting...';
-    
-    const explanations = {
-        bubble: '<p><strong>Bubble Sort:</strong> Membandingkan elemen bersebelahan dan menukarnya jika urutannya salah. Proses ini diulang hingga tidak ada lagi pertukaran. Kompleksitas: O(n²)</p>',
-        selection: '<p><strong>Selection Sort:</strong> Mencari elemen terkecil dari array yang belum terurut, lalu menukarnya dengan elemen pertama yang belum terurut. Kompleksitas: O(n²)</p>',
-        insertion: '<p><strong>Insertion Sort:</strong> Membangun array terurut satu elemen pada satu waktu dengan memasukkan elemen ke posisi yang tepat. Kompleksitas: O(n²)</p>'
-    };
-    document.getElementById('algoExplanation').innerHTML = explanations[algorithm];
-    
-    if (algorithm === 'bubble') {
-        await bubbleSort();
-    } else if (algorithm === 'selection') {
-        await selectionSort();
-    } else if (algorithm === 'insertion') {
-        await insertionSort();
-    }
-    
+    await bubbleSort();
     isSorting = false;
     document.getElementById('sortStatus').textContent = 'Selesai!';
 }
@@ -2016,31 +1250,22 @@ function resetCanvas() {
 // ==================== INITIALIZATION ====================
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Supabase
     initSupabase();
     
-    // Initialize code editors
-    const editors = document.querySelectorAll('.code-editor');
-    editors.forEach(editor => {
+    document.querySelectorAll('.code-editor').forEach(editor => {
         editor.addEventListener('input', function() {
             this.style.color = 'var(--text-primary)';
         });
     });
 
-    document.documentElement.style.scrollBehavior = 'smooth';
-    
-    // Initialize drag and drop
     if (document.querySelector('.code-block')) {
         resetDragExercise();
-        initDragAndDrop();
     }
     
-    // Initialize canvas
     if (canvas) {
         generateRandomArray();
     }
     
-    // Keyboard shortcut for running code
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey && e.key === 'Enter') {
             const activeEditor = document.activeElement;
