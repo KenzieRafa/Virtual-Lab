@@ -1,11 +1,11 @@
-
+// ==================== SUPABASE CONFIGURATION ====================
 const SUPABASE_URL = 'https://blkplgvhkgtsgnindwht.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsa3BsZ3Zoa2d0c2duaW5kd2h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NDM1NjMsImV4cCI6MjA3NTUxOTU2M30.HClTmehLskf_mgebwpRH9g-gyprqjIs8mn97HBOIT1k';
 let supabaseClient = null;
 let currentUser = null;
 let isSupabaseEnabled = false;
 
-
+// ==================== SUPABASE INITIALIZATION ====================
 function initSupabase() {
     if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
         console.log('🔶 Running in DEMO MODE (without database)');
@@ -103,7 +103,6 @@ function updateUIForGuestUser() {
 }
 
 // ==================== AUTH MODAL FUNCTIONS ====================
-
 function showWelcomeModal() {
     if (!isSupabaseEnabled) return;
     const modal = document.getElementById('welcomeModal');
@@ -266,8 +265,6 @@ function clearAuthMessage() {
 }
 
 // ==================== SCORE CALCULATION FUNCTIONS ====================
-
-// Hitung rata-rata per bab (dari 5 soal)
 function calculateChapterAverage(chapterScores, chapterNum) {
     const babKey = `bab${chapterNum}`;
     const soalScores = chapterScores[babKey] || {};
@@ -281,7 +278,6 @@ function calculateChapterAverage(chapterScores, chapterNum) {
     return Math.round(average);
 }
 
-// Hitung Total Nilai Latihan (maksimal 500)
 function calculateTotalScore(chapterScores) {
     let total = 0;
     for (let bab = 1; bab <= 5; bab++) {
@@ -290,7 +286,6 @@ function calculateTotalScore(chapterScores) {
     return total;
 }
 
-// Save score per soal (bukan per bab)
 async function saveChapterScore(chapterNum, problemNum, score) {
     if (!isSupabaseEnabled || !currentUser) return;
     
@@ -330,7 +325,6 @@ async function saveChapterScore(chapterNum, problemNum, score) {
 }
 
 // ==================== PROGRESS TRACKING ====================
-
 async function markChapterComplete(chapterNum) {
     if (!isSupabaseEnabled || !currentUser) {
         alert('Silakan Sign In terlebih dahulu untuk menyimpan progress!');
@@ -435,7 +429,6 @@ async function updateDragDropStats(isCorrect) {
 }
 
 // ==================== LEADERBOARD ====================
-
 async function loadLeaderboard() {
     const leaderboardList = document.getElementById('leaderboardList');
     if (!leaderboardList) return;
@@ -501,7 +494,6 @@ async function loadLeaderboard() {
 }
 
 // ==================== PROFILE PAGE ====================
-
 async function loadProfilePage() {
     if (!isSupabaseEnabled) {
         document.getElementById('profileName').textContent = 'Demo Mode';
@@ -589,7 +581,7 @@ async function loadProfilePage() {
             let detailHTML = '';
             for (let j = 1; j <= 5; j++) {
                 const soalScore = soalScores[`soal${j}`] || 0;
-                const soalStatus = soalScore === 100 ? '✓' : soalScore > 0 ? '○' : '—';
+                const soalStatus = soalScore === 100 ? '✓' : soalScore > 0 ? '◯' : '—';
                 detailHTML += `
                     <div style="display: flex; justify-content: space-between; padding: 0.25rem 0;">
                         <span>${soalStatus} Soal ${i}.${j}</span>
@@ -627,7 +619,6 @@ async function loadProfilePage() {
 }
 
 // ==================== NAVIGATION ====================
-
 function showPage(pageId) {
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => page.classList.remove('active'));
@@ -669,7 +660,6 @@ function backToChapterSelection() {
 }
 
 // ==================== PROBLEMS DATA ====================
-
 const problemsData = {
     1: [
         {
@@ -869,7 +859,6 @@ function playVideo(chapterNumber) {
 }
 
 // ==================== CODE EXECUTION ====================
-
 async function runCode(problemId) {
     const editor = document.getElementById(`editor-${problemId}`);
     const output = document.getElementById(`output-${problemId}`);
@@ -901,7 +890,6 @@ async function runCode(problemId) {
         
         if (score >= 70) showMessage(output, 'success', 'Excellent!');
         
-        // Save score PER SOAL
         const [chapter, problem] = problemId.split('-').map(Number);
         await saveChapterScore(chapter, problem, score);
     }, 1500);
@@ -926,145 +914,279 @@ function simulatePythonExecution(code, problemId) {
     return { output };
 }
 
-// Simulation functions (simplified - tambahkan sesuai kebutuhan)
+// ==================== SIMULATION FUNCTIONS ====================
 function simulateChapter1(code, problem) {
-    if (problem === 1 && code.includes('kangkung') && code.includes('input')) {
-        return `Simulasi:\nKeranjang kangkung: 2\nKeranjang wortel: 3\nKeranjang kol: 1\nHarga per keranjang: 50000\nPendapatan bersih: Rp 280,000`;
-    }
-    if (problem === 2 && code.includes('9/5') && code.includes('273.15')) {
-        return `Simulasi:\nSuhu (°C): 25\n25.0 °C = 77.00 °F = 298.15 K`;
-    }
-    if (problem === 3 && code.includes('0.11') && code.includes('ppn')) {
-        return `Simulasi:\nSubtotal: Rp 125,000\nPPN 11%: Rp 13,750\nTotal: Rp 138,750`;
-    }
-    if (problem === 4 && code.includes('if') && code.includes('tahun')) {
-        return `Simulasi:\nTahun lahir: 2000\nTahun target: 2025\nUmur: 25 tahun`;
-    }
-    if (problem === 5 && code.includes('/3') && code.includes('rata')) {
-        return `Simulasi:\nNilai 1: 80\nNilai 2: 70\nNilai 3: 85\nRata-rata: 78.33 -> Lulus`;
+    const lowerCode = code.toLowerCase();
+    
+    switch(problem) {
+        case 1:
+            if (lowerCode.includes('kangkung') && lowerCode.includes('wortel') && 
+                lowerCode.includes('kol') && lowerCode.includes('harga') && 
+                lowerCode.includes('input') && lowerCode.includes('print')) {
+                return `✅ Simulasi Soal 1.1:\nKeranjang kangkung: 2\nKeranjang wortel: 3\nKeranjang kol: 1\nHarga per keranjang (Rp): 50000\nBiaya transportasi (Rp): 20000\n\nTotal keranjang: 6\nPendapatan kotor: Rp 300,000.00\nPendapatan bersih: Rp 280,000.00`;
+            }
+            break;
+        case 2:
+            if ((lowerCode.includes('9/5') || lowerCode.includes('9 / 5')) && 
+                lowerCode.includes('273.15') && lowerCode.includes('input')) {
+                return `✅ Simulasi Soal 1.2:\nSuhu (°C): 25\n25.0 °C = 77.00 °F = 298.15 K`;
+            }
+            break;
+        case 3:
+            if (lowerCode.includes('0.11') && lowerCode.includes('ppn') && 
+                lowerCode.includes('subtotal') && lowerCode.includes('total')) {
+                return `✅ Simulasi Soal 1.3:\nNama barang 1: Buku\nHarga barang 1: Rp 50000\nJumlah barang 1: 2\nNama barang 2: Pensil\nHarga barang 2: Rp 5000\nJumlah barang 2: 5\n\nSubtotal: Rp 125,000.00\nPPN 11%: Rp 13,750.00\nTotal bayar: Rp 138,750.00`;
+            }
+            break;
+        case 4:
+            if (lowerCode.includes('tahun_lahir') && lowerCode.includes('tahun_target') && 
+                lowerCode.includes('if') && (lowerCode.includes('<') || lowerCode.includes('>'))) {
+                return `✅ Simulasi Soal 1.4:\nTahun lahir: 2000\nTahun target: 2025\nUmur pada tahun 2025: 25 tahun\n\nSimulasi dengan error:\nTahun lahir: 2010\nTahun target: 2005\nError: Tahun target harus >= tahun lahir`;
+            }
+            break;
+        case 5:
+            if ((lowerCode.includes('/ 3') || lowerCode.includes('/3')) && 
+                (lowerCode.includes('rata') || lowerCode.includes('average')) && 
+                lowerCode.includes('60') && lowerCode.includes('if')) {
+                return `✅ Simulasi Soal 1.5:\nNilai 1: 80\nNilai 2: 70\nNilai 3: 85\nRata-rata: 78.33\nLulus\n\nSimulasi kedua:\nNilai 1: 45\nNilai 2: 50\nNilai 3: 55\nRata-rata: 50.00\nTidak Lulus`;
+            }
+            break;
     }
     return '';
 }
 
 function simulateChapter2(code, problem) {
-    if (problem === 1 && code.includes('while') && code.includes('elif')) {
-        return `Simulasi:\nMasukkan nilai: 87\nIndeks: A`;
-    }
-    if (problem === 2 && code.includes('range') && code.includes('% 5')) {
-        return `Simulasi:\nNomor Antrian: 1-5\n----- Istirahat -----\nNomor Antrian: 6-7`;
-    }
-    if (problem === 3 && code.includes('random') && code.includes('tebakan')) {
-        return `Simulasi:\nTebakan benar di percobaan ke-3!`;
-    }
-    if (problem === 4 && code.includes('split()') && code.includes('% 2')) {
-        return `Simulasi:\nAngka genap: [2, 4, 6, 8]\nTotal: 4`;
-    }
-    if (problem === 5 && code.includes('while True') && code.includes('break')) {
-        return `Simulasi:\nKalkulator berjalan dengan baik!`;
+    const lowerCode = code.toLowerCase();
+    
+    switch(problem) {
+        case 1:
+            if (lowerCode.includes('while') && lowerCode.includes('elif') && 
+                lowerCode.includes('indeks') && lowerCode.includes('break')) {
+                return `✅ Simulasi Soal 2.1:\nMasukkan nilai (0-100): 150\nNilai tidak valid. Coba lagi.\nMasukkan nilai (0-100): 87\nIndeks: A`;
+            }
+            break;
+        case 2:
+            if (lowerCode.includes('range') && lowerCode.includes('% 5') && 
+                (lowerCode.includes('istirahat') || lowerCode.includes('garis') || lowerCode.includes('-----'))) {
+                return `✅ Simulasi Soal 2.2:\nBerapa tiket? 7\nNomor Antrian: 1\nNomor Antrian: 2\nNomor Antrian: 3\nNomor Antrian: 4\nNomor Antrian: 5\n----- Istirahat Operator -----\nNomor Antrian: 6\nNomor Antrian: 7`;
+            }
+            break;
+        case 3:
+            if (lowerCode.includes('random') && lowerCode.includes('rahasia') && 
+                (lowerCode.includes('tebakan') || lowerCode.includes('tebak')) && lowerCode.includes('kesempatan')) {
+                return `✅ Simulasi Soal 2.3:\nAngka rahasia: 42\nTebakan ke-1: 50\nTerlalu besar.\nTebakan ke-2: 40\nTerlalu kecil.\nTebakan ke-3: 42\nBenar! Tebakan ke-3`;
+            }
+            break;
+        case 4:
+            if (lowerCode.includes('split()') && lowerCode.includes('% 2') && 
+                lowerCode.includes('genap')) {
+                return `✅ Simulasi Soal 2.4:\nMasukkan angka dipisah spasi: 1 2 3 4 5 6 7 8\nAngka genap: [2, 4, 6, 8]\nTotal genap: 4`;
+            }
+            break;
+        case 5:
+            if (lowerCode.includes('while true') && lowerCode.includes('break') && 
+                (lowerCode.includes('elif') || lowerCode.includes('else'))) {
+                return `✅ Simulasi Soal 2.5:\n1.+ 2.- 3.* 4./ 5.Keluar\nPilih: 1\nAngka 1: 10\nAngka 2: 5\n15.0\n1.+ 2.- 3.* 4./ 5.Keluar\nPilih: 5\nTerima kasih.`;
+            }
+            break;
     }
     return '';
 }
 
 function simulateChapter3(code, problem) {
-    if (problem === 1 && code.includes('len(pesan)')) {
-        return `Simulasi:\nPesan: HELLO\nIndeks 1: E`;
-    }
-    if (problem === 2 && code.includes('[::-1]') && code.includes('lower()')) {
-        return `Simulasi:\nKata: KATAK\nYA (Palindrom)`;
-    }
-    if (problem === 3 && code.includes('split(",")') && code.includes('split(":")')) {
-        return `Simulasi:\nTotal: Rp 48,000`;
-    }
-    if (problem === 4 && code.includes('set') && code.includes('unik')) {
-        return `Simulasi:\nJumlah kata unik: 8`;
-    }
-    if (problem === 5 && code.includes('copy()') && code.includes('sort')) {
-        return `Simulasi:\nTop 3: [95, 92, 88]`;
+    const lowerCode = code.toLowerCase();
+    
+    switch(problem) {
+        case 1:
+            if (lowerCode.includes('len(') && lowerCode.includes('pesan') && 
+                lowerCode.includes('if')) {
+                return `✅ Simulasi Soal 3.1:\nPesan: HELLO\nIndeks k (0-based): 1\nKarakter: 'E'\n\nSimulasi dengan error:\nPesan: HELLO\nIndeks k (0-based): 10\nIndeks tidak valid.`;
+            }
+            break;
+        case 2:
+            if (lowerCode.includes('[::-1]') && lowerCode.includes('lower()') && 
+                (lowerCode.includes('ya') || lowerCode.includes('tidak'))) {
+                return `✅ Simulasi Soal 3.2:\nKata: KATAK\nYA\n\nSimulasi kedua:\nKata: PYTHON\nTIDAK`;
+            }
+            break;
+        case 3:
+            if (lowerCode.includes('split(\',\')') && lowerCode.includes('split(\':\')') && 
+                lowerCode.includes('total')) {
+                return `✅ Simulasi Soal 3.3:\nMasukkan item (nama:harga, ...): susu:15000,roti:8000,telur:25000\nDaftar: [('susu', 15000.0), ('roti', 8000.0), ('telur', 25000.0)]\nTotal: Rp 48,000.00`;
+            }
+            break;
+        case 4:
+            if (lowerCode.includes('set') && (lowerCode.includes('unik') || lowerCode.includes('unique')) && 
+                lowerCode.includes('split()')) {
+                return `✅ Simulasi Soal 3.4:\nKalimat: Python adalah bahasa pemrograman yang mudah dipelajari dan Python sangat populer\nJumlah kata unik: 8`;
+            }
+            break;
+        case 5:
+            if (lowerCode.includes('copy()') && lowerCode.includes('sort') && 
+                (lowerCode.includes('reverse=true') || lowerCode.includes('[:3]'))) {
+                return `✅ Simulasi Soal 3.5:\nNilai (spasi): 78 92 65 88 79 95 73\nTop 3: [95, 92, 88]`;
+            }
+            break;
     }
     return '';
 }
 
 function simulateChapter4(code, problem) {
-    if (problem === 1 && code.includes('[[0')) {
-        return `Simulasi:\nPeta 3x4 berhasil dibuat!`;
-    }
-    if (problem === 2 && code.includes("[['-'") && code.includes('join')) {
-        return `Simulasi:\nPapan Tic-Tac-Toe berhasil!`;
-    }
-    if (problem === 3 && code.includes('sum(row)')) {
-        return `Simulasi:\nTotal per tim dihitung!`;
-    }
-    if (problem === 4 && code.includes('(i + j) % 2')) {
-        return `Simulasi:\nPola papan catur berhasil!`;
-    }
-    if (problem === 5 && code.includes('mat[i][j] == x')) {
-        return `Simulasi:\nDitemukan di posisi (1, 1)`;
+    const lowerCode = code.toLowerCase();
+    
+    switch(problem) {
+        case 1:
+            if (lowerCode.includes('[[0') && lowerCode.includes('range(c)') && 
+                lowerCode.includes('range(r)')) {
+                return `✅ Simulasi Soal 4.1:\nBaris R: 3\nKolom C: 4\n[0, 0, 0, 0]\n[0, 0, 0, 0]\n[0, 0, 0, 0]`;
+            }
+            break;
+        case 2:
+            if ((lowerCode.includes('[[\'-\'') || lowerCode.includes('[[\"-\"]')) && 
+                lowerCode.includes('join') && lowerCode.includes('papan')) {
+                return `✅ Simulasi Soal 4.2:\nPapan awal:\n- - -\n- - -\n- - -\nBaris (0-2): 1\nKolom (0-2): 1\nPapan setelah move:\n- - -\n- X -\n- - -`;
+            }
+            break;
+        case 3:
+            if (lowerCode.includes('sum(row)') && lowerCode.includes('enumerate')) {
+                return `✅ Simulasi Soal 4.3:\nR C: 3 4\n10 20 30 40\n15 25 35 45\n5 10 15 20\nTotal tim 1: 100\nTotal tim 2: 120\nTotal tim 3: 50`;
+            }
+            break;
+        case 4:
+            if (lowerCode.includes('(i + j) % 2') && (lowerCode.includes('"# "') || lowerCode.includes('\'# \'')) && 
+                lowerCode.includes('range(n)')) {
+                return `✅ Simulasi Soal 4.4:\nN: 4\n# # \n # #\n# # \n # #`;
+            }
+            break;
+        case 5:
+            if (lowerCode.includes('mat[i][j]') && lowerCode.includes('found') && 
+                lowerCode.includes('break')) {
+                return `✅ Simulasi Soal 4.5:\nR C: 3 3\n1 2 3\n4 5 6\n7 8 9\nCari angka X: 5\nDitemukan di: 1, 1\n\nSimulasi tidak ditemukan:\nCari angka X: 15\nTidak ditemukan`;
+            }
+            break;
     }
     return '';
 }
 
 function simulateChapter5(code, problem) {
-    if (problem === 1 && code.includes('def hitung_total') && code.includes('0.11')) {
-        return `Simulasi:\nTotal dengan PPN dan diskon: Rp 632,700`;
-    }
-    if (problem === 2 && code.includes('def cek_umur') && code.includes('minimal=15')) {
-        return `Simulasi:\nMemenuhi syarat!`;
-    }
-    if (problem === 3 && code.includes('def kalkulator') && code.includes('Error')) {
-        return `Simulasi:\nHasil: 13.0`;
-    }
-    if (problem === 4 && code.includes('def cetak_papan') && code.includes('def ganti_giliran')) {
-        return `Simulasi:\nFungsi berhasil!`;
-    }
-    if (problem === 5 && code.includes('def rata2') && code.includes('if not nums')) {
-        return `Simulasi:\nRata-rata: 30.00`;
+    const lowerCode = code.toLowerCase();
+    
+    switch(problem) {
+        case 1:
+            if (lowerCode.includes('def hitung_total') && lowerCode.includes('0.11') && 
+                lowerCode.includes('500000') && lowerCode.includes('return')) {
+                return `✅ Simulasi Soal 5.1:\nSubtotal: Rp 600000\nTotal bayar: Rp 632,700.00\n(Dengan diskon 5% karena >= 500000)\n\nSimulasi tanpa diskon:\nSubtotal: Rp 200000\nTotal bayar: Rp 222,000.00`;
+            }
+            break;
+        case 2:
+            if (lowerCode.includes('def cek_umur') && lowerCode.includes('minimal=15') && 
+                lowerCode.includes('return')) {
+                return `✅ Simulasi Soal 5.2:\nUmur: 17\nMemenuhi syarat.\n\nSimulasi kedua:\nUmur: 12\nBelum memenuhi syarat.`;
+            }
+            break;
+        case 3:
+            if (lowerCode.includes('def kalkulator') && lowerCode.includes('error') && 
+                lowerCode.includes('return') && lowerCode.includes('elif')) {
+                return `✅ Simulasi Soal 5.3:\nA: 10\nB: 3\nOperasi (+-*/): +\n13.0\n\nSimulasi pembagian nol:\nA: 10\nB: 0\nOperasi (+-*/): /\nError: pembagian 0`;
+            }
+            break;
+        case 4:
+            if (lowerCode.includes('def cetak_papan') && lowerCode.includes('def ganti_giliran') && 
+                (lowerCode.includes('\'|\'') || lowerCode.includes('\"|\"'))) {
+                return `✅ Simulasi Soal 5.4:\nPapan awal:\n- | - | -\n- | - | -\n- | - | -\nBaris: 0\nKolom: 0\nPapan setelah move:\nX | - | -\n- | - | -\n- | - | -\nGiliran selanjutnya: O`;
+            }
+            break;
+        case 5:
+            if (lowerCode.includes('def rata2') && lowerCode.includes('if not nums') && 
+                lowerCode.includes('return none')) {
+                return `✅ Simulasi Soal 5.5:\nMasukkan angka (spasi): 10 20 30 40 50\nRata-rata: 30.00\n\nSimulasi data kosong:\nMasukkan angka (spasi): \nTidak ada data.`;
+            }
+            break;
     }
     return '';
 }
 
 // ==================== SCORING ====================
-
 function calculateScore(code, problemId) {
     let score = 0;
     const [chapter, problem] = problemId.split('-').map(Number);
     const requirements = getRequirements(chapter, problem);
+    const lowerCode = code.toLowerCase();
     
     requirements.forEach(req => {
-        if (code.includes(req.keyword)) score += req.points;
+        if (lowerCode.includes(req.keyword.toLowerCase())) {
+            score += req.points;
+        }
     });
     
-    if (code.includes('#')) score += 10;
+    if (code.includes('#')) score += 5;
     if (code.includes('print(f')) score += 5;
+    
     return Math.min(score, 100);
 }
 
 function getRequirements(chapter, problem) {
     const reqs = {
-        1: {1: [{keyword: 'kangkung', points: 15}, {keyword: 'input', points: 25}, {keyword: 'print', points: 20}],
-            2: [{keyword: '9/5', points: 25}, {keyword: '273.15', points: 25}, {keyword: 'input', points: 20}],
-            3: [{keyword: '0.11', points: 25}, {keyword: 'ppn', points: 20}, {keyword: 'print', points: 15}],
-            4: [{keyword: 'if', points: 25}, {keyword: 'tahun', points: 20}, {keyword: 'print', points: 15}],
-            5: [{keyword: '/3', points: 25}, {keyword: 'rata', points: 20}, {keyword: '>=', points: 15}]},
-        2: {1: [{keyword: 'while', points: 25}, {keyword: 'elif', points: 25}, {keyword: 'break', points: 15}],
-            2: [{keyword: 'range', points: 25}, {keyword: '% 5', points: 25}, {keyword: 'for', points: 15}],
-            3: [{keyword: 'random', points: 25}, {keyword: 'tebakan', points: 20}, {keyword: 'for', points: 15}],
-            4: [{keyword: 'split()', points: 25}, {keyword: '% 2', points: 25}, {keyword: 'genap', points: 15}],
-            5: [{keyword: 'while True', points: 25}, {keyword: 'break', points: 20}, {keyword: 'elif', points: 15}]},
-        3: {1: [{keyword: 'len(pesan)', points: 30}, {keyword: 'indeks', points: 25}, {keyword: 'if', points: 15}],
-            2: [{keyword: '[::-1]', points: 30}, {keyword: 'lower()', points: 25}, {keyword: 'YA', points: 15}],
-            3: [{keyword: 'split(",")', points: 25}, {keyword: 'split(":")', points: 25}, {keyword: 'items', points: 15}],
-            4: [{keyword: 'set', points: 30}, {keyword: 'unik', points: 25}, {keyword: 'split()', points: 15}],
-            5: [{keyword: 'copy()', points: 25}, {keyword: 'sort', points: 25}, {keyword: 'reverse=True', points: 20}]},
-        4: {1: [{keyword: '[[0', points: 30}, {keyword: 'range(c)', points: 25}, {keyword: 'range(r)', points: 15}],
-            2: [{keyword: "[['-'", points: 25}, {keyword: 'join', points: 25}, {keyword: 'papan', points: 15}],
-            3: [{keyword: 'sum(row)', points: 30}, {keyword: 'enumerate', points: 25}, {keyword: 'map(int', points: 15}],
-            4: [{keyword: '(i + j) % 2', points: 30}, {keyword: '"# "', points: 25}, {keyword: 'range(n)', points: 15}],
-            5: [{keyword: 'mat[i][j] == x', points: 30}, {keyword: 'found', points: 25}, {keyword: 'break', points: 15}]},
-        5: {1: [{keyword: 'def hitung_total', points: 30}, {keyword: '0.11', points: 20}, {keyword: 'return', points: 20}],
-            2: [{keyword: 'def cek_umur', points: 30}, {keyword: 'minimal=15', points: 25}, {keyword: 'return', points: 20}],
-            3: [{keyword: 'def kalkulator', points: 30}, {keyword: 'Error', points: 25}, {keyword: 'return', points: 15}],
-            4: [{keyword: 'def cetak_papan', points: 25}, {keyword: 'def ganti_giliran', points: 25}, {keyword: 'return', points: 15}],
-            5: [{keyword: 'def rata2', points: 30}, {keyword: 'if not nums', points: 25}, {keyword: 'return None', points: 20}]}
+        1: {
+            1: [{keyword: 'kangkung', points: 15}, {keyword: 'wortel', points: 15}, {keyword: 'kol', points: 10}, 
+                {keyword: 'input', points: 15}, {keyword: 'int(', points: 10}, {keyword: 'float(', points: 10}, {keyword: 'print', points: 15}],
+            2: [{keyword: '9/5', points: 25}, {keyword: '273.15', points: 25}, {keyword: 'float(', points: 20}, 
+                {keyword: 'input', points: 15}, {keyword: 'print', points: 10}],
+            3: [{keyword: '0.11', points: 25}, {keyword: 'ppn', points: 20}, {keyword: 'subtotal', points: 15}, 
+                {keyword: 'total', points: 15}, {keyword: 'input', points: 10}, {keyword: 'print', points: 10}],
+            4: [{keyword: 'tahun_lahir', points: 15}, {keyword: 'tahun_target', points: 15}, {keyword: 'if', points: 20}, 
+                {keyword: '<', points: 15}, {keyword: 'else', points: 15}, {keyword: 'print', points: 15}],
+            5: [{keyword: '/3', points: 20}, {keyword: 'rata', points: 20}, {keyword: '60', points: 15}, 
+                {keyword: '>=', points: 15}, {keyword: 'if', points: 15}, {keyword: 'print', points: 10}]
+        },
+        2: {
+            1: [{keyword: 'while', points: 20}, {keyword: 'elif', points: 20}, {keyword: 'indeks', points: 15}, 
+                {keyword: '>=', points: 15}, {keyword: 'break', points: 15}, {keyword: '0 <=', points: 10}],
+            2: [{keyword: 'range', points: 20}, {keyword: '% 5', points: 25}, {keyword: 'istirahat', points: 15}, 
+                {keyword: 'for', points: 15}, {keyword: 'if', points: 15}],
+            3: [{keyword: 'random', points: 20}, {keyword: 'rahasia', points: 15}, {keyword: 'kesempatan', points: 15}, 
+                {keyword: 'tebakan', points: 15}, {keyword: 'elif', points: 15}, {keyword: 'break', points: 15}],
+            4: [{keyword: 'split()', points: 20}, {keyword: '% 2', points: 25}, {keyword: 'genap', points: 15}, 
+                {keyword: '[', points: 15}, {keyword: 'len', points: 15}],
+            5: [{keyword: 'while true', points: 20}, {keyword: 'break', points: 20}, {keyword: 'elif', points: 15}, 
+                {keyword: 'float', points: 15}, {keyword: 'input', points: 15}]
+        },
+        3: {
+            1: [{keyword: 'len(', points: 25}, {keyword: 'pesan', points: 20}, {keyword: 'if', points: 15}, 
+                {keyword: '<=', points: 15}, {keyword: 'else', points: 15}],
+            2: [{keyword: '[::-1]', points: 30}, {keyword: 'lower()', points: 20}, {keyword: 'ya', points: 15}, 
+                {keyword: 'if', points: 15}, {keyword: '==', points: 10}],
+            3: [{keyword: 'split(\',\')', points: 20}, {keyword: 'split(\':\')' , points: 20}, {keyword: 'total', points: 15}, 
+                {keyword: 'for', points: 15}, {keyword: 'append', points: 15}],
+            4: [{keyword: 'set', points: 30}, {keyword: 'unik', points: 20}, {keyword: 'split()', points: 20}, 
+                {keyword: 'lower()', points: 15}, {keyword: 'len', points: 10}],
+            5: [{keyword: 'copy()', points: 25}, {keyword: 'sort', points: 25}, {keyword: 'reverse=true', points: 20}, 
+                {keyword: '[:3]', points: 15}, {keyword: 'split()', points: 10}]
+        },
+        4: {
+            1: [{keyword: '[[0', points: 25}, {keyword: 'range(c)', points: 20}, {keyword: 'range(r)', points: 20}, 
+                {keyword: 'for', points: 20}, {keyword: 'print', points: 10}],
+            2: [{keyword: '[[\'', points: 20}, {keyword: 'join', points: 20}, {keyword: 'papan', points: 20}, 
+                {keyword: 'int(input', points: 20}, {keyword: 'for row', points: 15}],
+            3: [{keyword: 'sum(row)', points: 25}, {keyword: 'enumerate', points: 25}, {keyword: 'map(int', points: 20}, 
+                {keyword: 'append', points: 15}, {keyword: 'for', points: 10}],
+            4: [{keyword: '(i + j) % 2', points: 30}, {keyword: '"# "', points: 20}, {keyword: 'range(n)', points: 20}, 
+                {keyword: 'for i', points: 15}, {keyword: 'for j', points: 10}],
+            5: [{keyword: 'mat[i][j]', points: 25}, {keyword: 'found', points: 20}, {keyword: 'break', points: 20}, 
+                {keyword: 'for i in range', points: 15}, {keyword: 'for j in range', points: 15}]
+        },
+        5: {
+            1: [{keyword: 'def hitung_total', points: 25}, {keyword: '0.11', points: 20}, {keyword: '500000', points: 20}, 
+                {keyword: 'return', points: 20}, {keyword: 'if', points: 10}],
+            2: [{keyword: 'def cek_umur', points: 25}, {keyword: 'minimal=15', points: 25}, {keyword: 'return', points: 20}, 
+                {keyword: '>=', points: 15}, {keyword: 'if', points: 10}],
+            3: [{keyword: 'def kalkulator', points: 25}, {keyword: 'error', points: 20}, {keyword: 'return', points: 20}, 
+                {keyword: 'elif', points: 15}, {keyword: 'if', points: 15}],
+            4: [{keyword: 'def cetak_papan', points: 20}, {keyword: 'def ganti_giliran', points: 20}, {keyword: '|', points: 20}, 
+                {keyword: 'return', points: 20}, {keyword: 'for row', points: 15}],
+            5: [{keyword: 'def rata2', points: 25}, {keyword: 'if not nums', points: 25}, {keyword: 'return none', points: 20}, 
+                {keyword: 'sum', points: 15}, {keyword: 'len', points: 10}]
+        }
     };
     return reqs[chapter]?.[problem] || [];
 }
@@ -1091,11 +1213,31 @@ function showMessage(container, type, message) {
 }
 
 // ==================== DRAG & DROP ====================
-
 let draggedElement = null;
 const dragDropProblems = [
-    {title: "Menyusun Fungsi", blocks: [{id:'1',code:'def hitung_rata(nilai):'},{id:'2',code:'    total = sum(nilai)'},{id:'3',code:'    return total / len(nilai)'},{id:'4',code:'nilai_siswa = [80, 90, 75, 85]'},{id:'5',code:'print(f"Rata-rata: {hitung_rata(nilai_siswa)}")'}], correctOrder: ['4','1','2','3','5'], hint: "variabel → fungsi → panggil"},
-    {title: "Loop dengan Kondisi", blocks: [{id:'1',code:'for i in range(5):'},{id:'2',code:'    if i % 2 == 0:'},{id:'3',code:'        print("Genap")'},{id:'4',code:'    print(f"Angka: {i}")'}], correctOrder: ['1','2','3','4'], hint: "loop → if → aksi"},
+    {
+        title: "Menyusun Fungsi Hitung Rata-rata",
+        blocks: [
+            {id:'1',code:'def hitung_rata(nilai):'},
+            {id:'2',code:'    total = sum(nilai)'},
+            {id:'3',code:'    return total / len(nilai)'},
+            {id:'4',code:'nilai_siswa = [80, 90, 75, 85]'},
+            {id:'5',code:'print(f"Rata-rata: {hitung_rata(nilai_siswa)}")'}
+        ],
+        correctOrder: ['4','1','2','3','5'],
+        hint: "variabel → fungsi → panggil"
+    },
+    {
+        title: "Loop dengan Kondisi",
+        blocks: [
+            {id:'1',code:'for i in range(5):'},
+            {id:'2',code:'    if i % 2 == 0:'},
+            {id:'3',code:'        print("Genap")'},
+            {id:'4',code:'    print(f"Angka: {i}")'}
+        ],
+        correctOrder: ['1','2','3','4'],
+        hint: "loop → if → aksi"
+    }
 ];
 let currentProblemIndex = 0;
 
@@ -1117,6 +1259,13 @@ function initDragAndDrop() {
                 const emptyMsg = this.querySelector('.empty-message');
                 if (emptyMsg) emptyMsg.remove();
                 const clone = draggedElement.cloneNode(true);
+                clone.addEventListener('dragstart', function(e) {
+                    draggedElement = this;
+                    this.classList.add('dragging');
+                });
+                clone.addEventListener('dragend', function() {
+                    this.classList.remove('dragging');
+                });
                 this.appendChild(clone);
                 if (draggedElement.parentElement.id === 'solution-area') draggedElement.remove();
             }
@@ -1178,7 +1327,6 @@ function resetDragExercise() {
 }
 
 // ==================== CANVAS ====================
-
 const canvas = document.getElementById('sortCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
 let array = [];
@@ -1248,7 +1396,6 @@ function resetCanvas() {
 }
 
 // ==================== INITIALIZATION ====================
-
 document.addEventListener('DOMContentLoaded', function() {
     initSupabase();
     
