@@ -1,10 +1,11 @@
 # Virtual Lab - Berpikir Komputasional TPB ITB
+Link Deployment Wesbite VIRTUAL LAB: https://virtual-lab-five.vercel.app/
 
 ## Author / Tim Proyek
 
 | Nama       | NIM           |
 |------------|----------------------|
-| Kenzie R   | 18223127 |
+| Kenzie Raffa Ardhana   | 18223127 |
 
 ---
 
@@ -20,6 +21,7 @@ Platform ini memungkinkan pengguna untuk:
 - Menggunakan aktivitas tambahan seperti drag-and-drop & visualisasi untuk memperkuat konsep  
 
 Tujuan utama: membuat proses belajar pemrograman menjadi lebih intuitif, engaging, dan mudah diakses.
+
 
 ---
 
