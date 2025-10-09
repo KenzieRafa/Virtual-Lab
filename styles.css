@@ -1633,3 +1633,20 @@ main {
         padding: 1rem;
     }
 }
+/* Enhanced chapter score display */
+.chapter-score-item small {
+    margin-top: 0.3rem;
+    font-weight: normal;
+}
+
+.chapter-score-value {
+    font-size: 1.3rem;
+    min-width: 80px;
+    text-align: right;
+}
+
+/* Locked chapter indicator */
+.chapter-score-item.locked .chapter-score-value {
+    color: #fbbf24;
+    font-weight: 800;
+}

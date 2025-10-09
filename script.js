@@ -15,6 +15,37 @@ function initSupabase() {
     }
 }
 
+// ==================== SCORING CALCULATION HELPERS ====================
+
+// Calculate average score for a chapter
+function calculateChapterAverage(chapterScores) {
+    if (!chapterScores || Object.keys(chapterScores).length === 0) {
+        return 0;
+    }
+    
+    const scores = Object.values(chapterScores);
+    const sum = scores.reduce((acc, score) => acc + score, 0);
+    return Math.round(sum / 5); // Always divide by 5 (5 soal per bab)
+}
+
+// Calculate Total Nilai Latihan (TNL)
+function calculateTotalScore(allChapterScores) {
+    let total = 0;
+    
+    for (let i = 1; i <= 5; i++) {
+        const babKey = `bab${i}`;
+        const chapterScores = allChapterScores[babKey] || {};
+        total += calculateChapterAverage(chapterScores);
+    }
+    
+    return total;
+}
+
+// Check if chapter average is already 100 (locked)
+function isChapterLocked(chapterScores) {
+    return calculateChapterAverage(chapterScores) >= 100;
+}
+
 // ==================== AUTH FUNCTIONS ====================
 
 // Check current authentication state
@@ -386,10 +417,12 @@ async function loadUserProgress() {
 }
 
 // Save chapter score
-async function saveChapterScore(chapterNum, score) {
+// Save chapter score with new structure
+async function saveChapterScore(chapterNum, problemNum, score) {
     if (!currentUser) return;
     
     try {
+        // Get current progress
         const { data: progress, error: fetchError } = await supabaseClient
             .from('user_progress')
             .select('chapter_scores')
@@ -400,11 +433,27 @@ async function saveChapterScore(chapterNum, score) {
         
         let chapterScores = progress?.chapter_scores || {};
         
-        // Update score only if new score is higher
-        const currentScore = chapterScores[`bab${chapterNum}`] || 0;
-        if (score > currentScore) {
-            chapterScores[`bab${chapterNum}`] = score;
+        // Initialize chapter if doesn't exist
+        const babKey = `bab${chapterNum}`;
+        if (!chapterScores[babKey]) {
+            chapterScores[babKey] = {};
+        }
+        
+        // Check if chapter is already locked at 100
+        const currentAverage = calculateChapterAverage(chapterScores[babKey]);
+        
+        // Get current score for this specific problem
+        const soalKey = `soal${problemNum}`;
+        const currentProblemScore = chapterScores[babKey][soalKey] || 0;
+        
+        // Only update if new score is higher than current score
+        if (score > currentProblemScore) {
+            chapterScores[babKey][soalKey] = score;
             
+            // Calculate new average
+            const newAverage = calculateChapterAverage(chapterScores[babKey]);
+            
+            // Update database
             const { error: updateError } = await supabaseClient
                 .from('user_progress')
                 .update({ 
@@ -414,7 +463,19 @@ async function saveChapterScore(chapterNum, score) {
                 .eq('user_id', currentUser.id);
             
             if (updateError) throw updateError;
+            
+            // Show feedback to user
+            if (currentAverage >= 100) {
+                console.log(`Bab ${chapterNum} sudah locked di 100, tidak menambah TNL`);
+            } else if (newAverage >= 100) {
+                alert(`🎉 Selamat! Bab ${chapterNum} mencapai nilai sempurna 100!`);
+            } else {
+                console.log(`Bab ${chapterNum} average: ${currentAverage} → ${newAverage}`);
+            }
+        } else {
+            console.log(`Skor tidak diupdate. Current: ${currentProblemScore}, New: ${score}`);
         }
+        
     } catch (error) {
         console.error('Error saving score:', error);
     }
@@ -475,18 +536,21 @@ async function loadLeaderboard() {
         
         const leaderboardData = progressData.map(progress => {
             const profile = profilesData.find(p => p.user_id === progress.user_id);
-            const scores = progress.chapter_scores || {};
-            const totalScore = Object.values(scores).reduce((sum, score) => sum + score, 0);
+            const chapterScores = progress.chapter_scores || {};
+            
+            // Calculate TNL (Total Nilai Latihan)
+            const totalScore = calculateTotalScore(chapterScores);
             const completedModules = (progress.completed_modules || []).length;
             
             return {
                 userId: progress.user_id,
                 name: profile?.display_name || 'User',
-                totalScore: totalScore,
+                totalScore: totalScore, // TNL (max 500)
                 completedModules: completedModules
             };
         });
         
+        // Sort by TNL descending
         leaderboardData.sort((a, b) => b.totalScore - a.totalScore);
         
         if (leaderboardData.length === 0) {
@@ -511,7 +575,7 @@ async function loadLeaderboard() {
                     <div class="leaderboard-name">${user.name}</div>
                     <div class="leaderboard-progress">${user.completedModules} / 5 Modul Selesai</div>
                 </div>
-                <div class="leaderboard-score">${user.totalScore}</div>
+                <div class="leaderboard-score">${user.totalScore}/500</div>
             `;
             
             leaderboardList.appendChild(item);
@@ -522,7 +586,6 @@ async function loadLeaderboard() {
         leaderboardList.innerHTML = '<div class="loading-message">Gagal memuat leaderboard.</div>';
     }
 }
-
 // ==================== PROFILE PAGE ====================
 
 async function loadProfilePage() {
@@ -558,25 +621,48 @@ async function loadProfilePage() {
         const chapterScores = progress?.chapter_scores || {};
         const dragDropStats = progress?.drag_drop_stats || { attempts: 0, correct: 0 };
         
-        const totalScore = Object.values(chapterScores).reduce((sum, score) => sum + score, 0);
+        // Calculate TNL (Total Nilai Latihan)
+        const totalScore = calculateTotalScore(chapterScores);
+        
         const accuracy = dragDropStats.attempts > 0 
             ? Math.round((dragDropStats.correct / dragDropStats.attempts) * 100) 
             : 0;
         
         document.getElementById('completedModules').textContent = `${completedModules.length} / 5`;
-        document.getElementById('totalScore').textContent = totalScore;
+        document.getElementById('totalScore').textContent = `${totalScore}/500`; // Show TNL
         document.getElementById('dragDropAccuracy').textContent = `${accuracy}%`;
         
         const chapterScoresList = document.getElementById('chapterScoresList');
         chapterScoresList.innerHTML = '';
         
+        // Display average per chapter
         for (let i = 1; i <= 5; i++) {
-            const score = chapterScores[`bab${i}`] || 0;
+            const babKey = `bab${i}`;
+            const babScores = chapterScores[babKey] || {};
+            const average = calculateChapterAverage(babScores);
+            
             const item = document.createElement('div');
             item.className = 'chapter-score-item';
+            
+            // Add visual indicator if chapter is completed
+            let statusIcon = '';
+            if (average >= 100) {
+                statusIcon = ' 🏆'; // Trophy for perfect score
+            } else if (average >= 70) {
+                statusIcon = ' ⭐'; // Star for good score
+            }
+            
+            // Count how many problems are completed
+            const completedProblems = Object.keys(babScores).length;
+            
             item.innerHTML = `
-                <div class="chapter-score-name">Bab ${i}</div>
-                <div class="chapter-score-value">${score}</div>
+                <div class="chapter-score-name">
+                    Bab ${i}${statusIcon}
+                    <small style="color: var(--text-muted); font-size: 0.85rem; display: block;">
+                        ${completedProblems}/5 soal dikerjakan
+                    </small>
+                </div>
+                <div class="chapter-score-value">${average}/100</div>
             `;
             chapterScoresList.appendChild(item);
         }
@@ -885,9 +971,10 @@ async function runCode(problemId) {
             showMessage(output, 'success', 'Excellent! Kode Anda berjalan dengan baik!');
         }
         
-        // Save score to database
+        // Save score to database with new structure
         const [chapter, problem] = problemId.split('-').map(Number);
-        await saveChapterScore(chapter, score);
+        await saveChapterScore(chapter, problem, score); // ✅ Updated with problemNum
+        
     }, 1500);
 }
 
