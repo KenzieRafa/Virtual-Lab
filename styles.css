@@ -1889,7 +1889,7 @@ nav button.active::before {
     cursor: pointer;
     padding: 0;
     z-index: 1001;
-    order: -3; /* ✅ Force hamburger ke paling kiri */
+    order: -1; /* ✅ Force hamburger ke paling kiri */
 }
 
 .hamburger-btn span {
