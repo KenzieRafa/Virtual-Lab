@@ -19,11 +19,17 @@
     --gradient-accent: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
 }
 /* ==================== BASE RESPONSIVE UTILITIES ==================== */
+/* Default: Desktop tampil normal */
 .desktop-only {
-    display: flex;
+    display: flex !important;
 }
 
 .mobile-only {
+    display: none !important;
+}
+
+/* Hamburger hidden di desktop */
+.hamburger-menu {
     display: none;
 }
 body {
