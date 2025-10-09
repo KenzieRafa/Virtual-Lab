@@ -11,6 +11,14 @@
 <body>
     <header>
     <div class="header-content">
+        <!-- ✅ HAMBURGER di KIRI (Mobile Only) -->
+        <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        
+        <!-- ✅ LOGO di TENGAH -->
         <div class="logo">
             <div class="logo-icon">
                 <div class="logo-text">
@@ -20,14 +28,7 @@
             </div>
         </div>
         
-        <!-- ✅ HAMBURGER MENU BUTTON (Mobile Only) -->
-        <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileMenu()">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-        
-        <!-- ✅ NAVIGATION (Desktop & Mobile) -->
+        <!-- ✅ NAVIGATION (Desktop Only) -->
         <nav id="mainNav" class="main-nav">
             <ul>
                 <li><button onclick="showPage('home')" class="nav-btn active" data-page="home">Beranda</button></li>
@@ -40,6 +41,7 @@
             </ul>
         </nav>
         
+        <!-- ✅ AUTH SECTION di KANAN -->
         <div class="auth-section" id="authSection">
             <button onclick="showAuthModal('signin')" class="auth-button" id="signInBtn">Sign In</button>
             <div class="user-profile-header" id="userProfileHeader" style="display: none;">
