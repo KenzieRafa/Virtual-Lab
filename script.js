@@ -112,7 +112,6 @@ async function createUserProfile() {
 }
 
 function updateUIForAuthenticatedUser() {
-    // Desktop
     const signInBtn = document.getElementById('signInBtn');
     const userProfileHeader = document.getElementById('userProfileHeader');
     const userNameHeader = document.getElementById('userNameHeader');
@@ -122,38 +121,14 @@ function updateUIForAuthenticatedUser() {
     if (userNameHeader) {
         userNameHeader.textContent = currentUser.displayName || currentUser.email.split('@')[0];
     }
-    
-    // 🆕 Mobile
-    const mobileSignInBtn = document.getElementById('mobileSignInBtn');
-    const mobileUserProfile = document.getElementById('mobileUserProfile');
-    const mobileUserName = document.getElementById('mobileUserName');
-    const mobileUserAvatar = document.getElementById('mobileUserAvatar');
-    
-    if (mobileSignInBtn) mobileSignInBtn.style.display = 'none';
-    if (mobileUserProfile) mobileUserProfile.style.display = 'flex';
-    if (mobileUserName) {
-        const displayName = currentUser.displayName || currentUser.email.split('@')[0];
-        mobileUserName.textContent = displayName;
-        if (mobileUserAvatar) {
-            mobileUserAvatar.textContent = displayName.charAt(0).toUpperCase();
-        }
-    }
 }
 
 function updateUIForGuestUser() {
-    // Desktop
     const signInBtn = document.getElementById('signInBtn');
     const userProfileHeader = document.getElementById('userProfileHeader');
     
     if (signInBtn) signInBtn.style.display = 'block';
     if (userProfileHeader) userProfileHeader.style.display = 'none';
-    
-    // 🆕 Mobile
-    const mobileSignInBtn = document.getElementById('mobileSignInBtn');
-    const mobileUserProfile = document.getElementById('mobileUserProfile');
-    
-    if (mobileSignInBtn) mobileSignInBtn.style.display = 'flex';
-    if (mobileUserProfile) mobileUserProfile.style.display = 'none';
 }
 
 // ==================== AUTH MODAL FUNCTIONS ====================
@@ -729,53 +704,6 @@ async function loadProfilePage() {
 }
 
 // ==================== NAVIGATION ====================
-// ==================== MOBILE MENU TOGGLE ====================
-function toggleMobileMenu() {
-    const nav = document.getElementById('mainNav');
-    const hamburger = document.getElementById('hamburgerBtn');
-    const body = document.body;
-    
-    nav.classList.toggle('mobile-active');
-    hamburger.classList.toggle('active');
-    
-    // Prevent body scroll when menu open
-    if (nav.classList.contains('mobile-active')) {
-        body.style.overflow = 'hidden';
-        
-        // Create overlay
-        let overlay = document.querySelector('.nav-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.className = 'nav-overlay';
-            overlay.onclick = toggleMobileMenu;
-            document.body.appendChild(overlay);
-        }
-        overlay.classList.add('active');
-    } else {
-        body.style.overflow = '';
-        const overlay = document.querySelector('.nav-overlay');
-        if (overlay) {
-            overlay.classList.remove('active');
-        }
-    }
-}
-
-// Close menu when clicking outside
-document.addEventListener('click', function(e) {
-    const nav = document.getElementById('mainNav');
-    const hamburger = document.getElementById('hamburgerBtn');
-    
-    if (nav && hamburger && 
-        nav.classList.contains('mobile-active') && 
-        !nav.contains(e.target) && 
-        !hamburger.contains(e.target)) {
-        nav.classList.remove('mobile-active');
-        hamburger.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-});
-
-// ==================== NAVIGATION ====================
 function showPage(pageId) {
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => page.classList.remove('active'));
@@ -787,17 +715,6 @@ function showPage(pageId) {
     navButtons.forEach(btn => btn.classList.remove('active'));
     const selectedButton = document.querySelector(`[data-page="${pageId}"]`);
     if (selectedButton) selectedButton.classList.add('active');
-    
-    // 🆕 Close mobile menu after navigation
-    const nav = document.getElementById('mainNav');
-    const hamburger = document.getElementById('hamburgerBtn');
-    if (nav && nav.classList.contains('mobile-active')) {
-        nav.classList.remove('mobile-active');
-        hamburger.classList.remove('active');
-        document.body.style.overflow = '';
-        const overlay = document.querySelector('.nav-overlay');
-        if (overlay) overlay.classList.remove('active');
-    }
     
     if (pageId === 'practice') backToChapterSelection();
     if (pageId === 'drag-drop') resetDragExercise();
@@ -1566,52 +1483,66 @@ let comparisons = 0;
 let swaps = 0;
 let isSorting = false;
 
-// 🆕 Setup Responsive Canvas
-function setupCanvas() {
-    if (!canvas) return;
-    
-    const container = canvas.parentElement;
-    const isMobile = window.innerWidth < 768;
-    
-    if (isMobile) {
-        canvas.width = Math.min(container.clientWidth - 40, 400);
-        canvas.height = 250;
-    } else {
-        canvas.width = Math.min(container.clientWidth - 40, 800);
-        canvas.height = 400;
-    }
-}
-
 function generateRandomArray() {
     if (isSorting) return;
-    
-    setupCanvas();
-    
     array = [];
-    const arraySize = window.innerWidth < 480 ? 20 : window.innerWidth < 768 ? 30 : 40;
-    const maxHeight = canvas.height - 50;
-    
-    for (let i = 0; i < arraySize; i++) {
-        array.push(Math.floor(Math.random() * maxHeight) + 20);
-    }
-    
+    for (let i = 0; i < 40; i++) array.push(Math.floor(Math.random() * 350) + 20);
     comparisons = 0;
     swaps = 0;
     updateStats();
     drawArray();
-    if (document.getElementById('sortStatus')) {
-        document.getElementById('sortStatus').textContent = 'Siap';
+    document.getElementById('sortStatus').textContent = 'Siap';
+}
+
+function drawArray(colorArray = []) {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const barWidth = canvas.width / array.length;
+    for (let i = 0; i < array.length; i++) {
+        ctx.fillStyle = colorArray[i] || '#3b82f6';
+        ctx.fillRect(i * barWidth, canvas.height - array[i], barWidth - 2, array[i]);
     }
 }
 
-// Resize canvas on window resize
-window.addEventListener('resize', () => {
-    if (canvas && document.getElementById('canvas-viz') && 
-        document.getElementById('canvas-viz').classList.contains('active')) {
-        setupCanvas();
-        drawArray();
+function updateStats() {
+    document.getElementById('comparisons').textContent = comparisons;
+    document.getElementById('swaps').textContent = swaps;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function bubbleSort() {
+    for (let i = 0; i < array.length - 1; i++) {
+        for (let j = 0; j < array.length - i - 1; j++) {
+            if (!isSorting) return;
+            comparisons++;
+            updateStats();
+            drawArray(array.map((_, idx) => idx === j || idx === j + 1 ? '#ef4444' : '#3b82f6'));
+            await sleep(50);
+            if (array[j] > array[j + 1]) {
+                [array[j], array[j + 1]] = [array[j + 1], array[j]];
+                swaps++;
+            }
+        }
     }
-});
+    drawArray(array.map(() => '#22c55e'));
+}
+
+async function startSorting() {
+    if (isSorting || array.length === 0) return;
+    isSorting = true;
+    document.getElementById('sortStatus').textContent = 'Sorting...';
+    await bubbleSort();
+    isSorting = false;
+    document.getElementById('sortStatus').textContent = 'Selesai!';
+}
+
+function resetCanvas() {
+    isSorting = false;
+    generateRandomArray();
+}
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', function() {
