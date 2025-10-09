@@ -1696,3 +1696,65 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+
+// ==================== MOBILE MENU TOGGLE ====================
+function toggleMobileMenu() {
+    const nav = document.getElementById('mainNav');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const body = document.body;
+    
+    nav.classList.toggle('active');
+    hamburgerBtn.classList.toggle('active');
+    body.classList.toggle('menu-open');
+}
+
+// ✅ Close menu saat klik nav button di mobile
+function showPage(pageId) {
+    // ... existing code ...
+    
+    // ✅ Close mobile menu setelah pilih page
+    if (window.innerWidth <= 768) {
+        const nav = document.getElementById('mainNav');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const body = document.body;
+        
+        nav.classList.remove('active');
+        hamburgerBtn.classList.remove('active');
+        body.classList.remove('menu-open');
+    }
+    
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(page => page.classList.remove('active'));
+    
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) targetPage.classList.add('active');
+
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => btn.classList.remove('active'));
+    const selectedButton = document.querySelector(`[data-page="${pageId}"]`);
+    if (selectedButton) selectedButton.classList.add('active');
+    
+    if (pageId === 'practice') backToChapterSelection();
+    if (pageId === 'drag-drop') resetDragExercise();
+    if (pageId === 'leaderboard') loadLeaderboard();
+    else if (pageId === 'profile') loadProfilePage();
+    else if (pageId === 'material') loadUserProgress();
+}
+
+// ✅ Close menu saat klik di luar (optional)
+document.addEventListener('click', function(event) {
+    const nav = document.getElementById('mainNav');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const body = document.body;
+    
+    if (window.innerWidth <= 768 && 
+        nav.classList.contains('active') && 
+        !nav.contains(event.target) && 
+        !hamburgerBtn.contains(event.target)) {
+        
+        nav.classList.remove('active');
+        hamburgerBtn.classList.remove('active');
+        body.classList.remove('menu-open');
+    }
+});
