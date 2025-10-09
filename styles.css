@@ -1744,3 +1744,40 @@ main {
     padding: 0 1rem;
     font-size: 0.85rem;
 }
+
+/* ==================== DRAG & DROP TOUCH SUPPORT ==================== */
+.code-block {
+    background: var(--secondary-dark);
+    border: 2px solid var(--border-color);
+    padding: 1rem 1.5rem;
+    margin: 0.8rem 0;
+    cursor: move;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    user-select: none;
+    touch-action: none; /* ✅ PENTING untuk touch events */
+    -webkit-user-select: none;
+}
+
+.code-block:active {
+    cursor: grabbing;
+}
+
+@media (max-width: 768px) {
+    .code-block {
+        padding: 1.2rem;
+        margin: 1rem 0;
+        font-size: 0.95rem;
+        min-height: 50px; /* ✅ Lebih mudah di-tap di mobile */
+    }
+    
+    .drag-zone {
+        min-height: 350px; /* ✅ Lebih besar di mobile */
+        padding: 1rem;
+    }
+    
+    .drag-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}

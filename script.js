@@ -1298,8 +1298,9 @@ function showMessage(container, type, message) {
 }
 
 // ==================== DRAG & DROP ====================
+// ==================== DRAG & DROP ====================
 let draggedElement = null;
-let isDragInitialized = false; // Flag untuk mencegah multiple init
+let isDragInitialized = false;
 
 const dragDropProblems = [
     {
@@ -1328,7 +1329,7 @@ const dragDropProblems = [
 ];
 let currentProblemIndex = 0;
 
-// Event handlers sebagai named functions (agar bisa di-remove)
+// ✅ EVENT HANDLERS (Desktop)
 function handleDragStart(e) {
     draggedElement = this;
     this.classList.add('dragging');
@@ -1336,16 +1337,33 @@ function handleDragStart(e) {
 
 function handleDragEnd(e) {
     this.classList.remove('dragging');
+    document.querySelectorAll('.drag-zone').forEach(zone => {
+        zone.classList.remove('drag-over');
+    });
 }
 
 function handleDragOver(e) {
     e.preventDefault();
 }
 
+function handleDragEnter(e) {
+    if (this.classList.contains('drag-zone')) {
+        this.classList.add('drag-over');
+    }
+}
+
+function handleDragLeave(e) {
+    if (this.classList.contains('drag-zone')) {
+        this.classList.remove('drag-over');
+    }
+}
+
 function handleDrop(e) {
     e.preventDefault();
     
     if (!draggedElement) return;
+    
+    this.classList.remove('drag-over');
     
     // Hapus empty message jika ada
     const emptyMsg = this.querySelector('.empty-message');
@@ -1354,21 +1372,118 @@ function handleDrop(e) {
     // Clone element
     const clone = draggedElement.cloneNode(true);
     
-    // Attach event ke clone
-    clone.addEventListener('dragstart', handleDragStart);
-    clone.addEventListener('dragend', handleDragEnd);
+    // ✅ ATTACH SEMUA EVENT KE CLONE (Desktop + Touch)
+    attachEventListeners(clone);
     
     // Append ke drop zone
     this.appendChild(clone);
     
     // Hapus original jika dari solution area
-    if (draggedElement.parentElement.id === 'solution-area') {
+    if (draggedElement.parentElement && draggedElement.parentElement.id === 'solution-area') {
         draggedElement.remove();
+    }
+    
+    draggedElement = null;
+}
+
+// ✅ EVENT HANDLERS (Mobile/Touch)
+let touchStartX = 0;
+let touchStartY = 0;
+
+function handleTouchStart(e) {
+    e.preventDefault();
+    draggedElement = this;
+    this.classList.add('dragging');
+    
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    
+    this.style.opacity = '0.5';
+    this.style.transform = 'scale(1.05)';
+}
+
+function handleTouchMove(e) {
+    e.preventDefault();
+    
+    if (!draggedElement) return;
+    
+    const touch = e.touches[0];
+    
+    // Visual feedback: highlight drop zone
+    const dropZone = document.getElementById('solution-area');
+    const rect = dropZone.getBoundingClientRect();
+    
+    if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+        touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+        dropZone.classList.add('drag-over');
+    } else {
+        dropZone.classList.remove('drag-over');
     }
 }
 
+function handleTouchEnd(e) {
+    e.preventDefault();
+    
+    if (!draggedElement) return;
+    
+    const touch = e.changedTouches[0];
+    const dropZone = document.getElementById('solution-area');
+    const rect = dropZone.getBoundingClientRect();
+    
+    draggedElement.style.opacity = '';
+    draggedElement.style.transform = '';
+    draggedElement.classList.remove('dragging');
+    dropZone.classList.remove('drag-over');
+    
+    // Check if dropped in valid zone
+    if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+        touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+        
+        const emptyMsg = dropZone.querySelector('.empty-message');
+        if (emptyMsg) emptyMsg.remove();
+        
+        const clone = draggedElement.cloneNode(true);
+        
+        // ✅ ATTACH EVENT KE CLONE
+        attachEventListeners(clone);
+        
+        dropZone.appendChild(clone);
+        
+        if (draggedElement.parentElement && draggedElement.parentElement.id === 'solution-area') {
+            draggedElement.remove();
+        }
+    }
+    
+    draggedElement = null;
+}
+
+// ✅ FUNGSI HELPER: ATTACH SEMUA EVENT LISTENER
+function attachEventListeners(element) {
+    // Desktop drag events
+    element.addEventListener('dragstart', handleDragStart);
+    element.addEventListener('dragend', handleDragEnd);
+    
+    // Mobile touch events
+    element.addEventListener('touchstart', handleTouchStart, { passive: false });
+    element.addEventListener('touchmove', handleTouchMove, { passive: false });
+    element.addEventListener('touchend', handleTouchEnd, { passive: false });
+}
+
+// ✅ FUNGSI HELPER: REMOVE SEMUA EVENT LISTENER
+function removeEventListeners(element) {
+    // Desktop
+    element.removeEventListener('dragstart', handleDragStart);
+    element.removeEventListener('dragend', handleDragEnd);
+    
+    // Mobile
+    element.removeEventListener('touchstart', handleTouchStart);
+    element.removeEventListener('touchmove', handleTouchMove);
+    element.removeEventListener('touchend', handleTouchEnd);
+}
+
+// ✅ INITIALIZE DRAG & DROP (Dipanggil saat page load & reset)
 function initDragAndDrop() {
-    // 🔥 PENTING: Cegah multiple initialization
     if (isDragInitialized) {
         console.log('⚠️ Drag & Drop already initialized, skipping...');
         return;
@@ -1376,45 +1491,45 @@ function initDragAndDrop() {
     
     console.log('✅ Initializing Drag & Drop...');
     
-    // Attach event ke code blocks
-    document.querySelectorAll('.code-block').forEach(el => {
-        el.addEventListener('dragstart', handleDragStart);
-        el.addEventListener('dragend', handleDragEnd);
-    });
+    // Attach event ke semua code blocks
+    document.querySelectorAll('.code-block').forEach(attachEventListeners);
     
-    // Attach event ke drop zones (HANYA SEKALI!)
+    // Attach event ke drop zones
     document.querySelectorAll('.drag-zone').forEach(zone => {
         zone.addEventListener('dragover', handleDragOver);
         zone.addEventListener('drop', handleDrop);
+        zone.addEventListener('dragenter', handleDragEnter);
+        zone.addEventListener('dragleave', handleDragLeave);
     });
     
     isDragInitialized = true;
 }
 
+// ✅ CLEANUP (Dipanggil sebelum reset)
 function cleanupDragAndDrop() {
     console.log('🧹 Cleaning up Drag & Drop events...');
     
-    // Remove event dari semua code blocks
-    document.querySelectorAll('.code-block').forEach(el => {
-        el.removeEventListener('dragstart', handleDragStart);
-        el.removeEventListener('dragend', handleDragEnd);
-    });
+    // Remove event dari code blocks
+    document.querySelectorAll('.code-block').forEach(removeEventListeners);
     
     // Remove event dari drop zones
     document.querySelectorAll('.drag-zone').forEach(zone => {
         zone.removeEventListener('dragover', handleDragOver);
         zone.removeEventListener('drop', handleDrop);
+        zone.removeEventListener('dragenter', handleDragEnter);
+        zone.removeEventListener('dragleave', handleDragLeave);
     });
     
     isDragInitialized = false;
 }
 
+// ✅ CHECK SOLUTION
 async function checkDragSolution() {
     const blocks = document.getElementById('solution-area').querySelectorAll('.code-block');
     const feedback = document.getElementById('drag-feedback');
     
     if (blocks.length === 0) {
-        feedback.textContent = 'Belum ada kode!';
+        feedback.textContent = '❌ Belum ada kode! Drag blok ke area solusi.';
         feedback.className = 'feedback-area show incorrect';
         return;
     }
@@ -1424,8 +1539,15 @@ async function checkDragSolution() {
     const isCorrect = JSON.stringify(userOrder) === JSON.stringify(problem.correctOrder);
     
     if (isCorrect) {
-        feedback.textContent = '🎉 Sempurna!';
+        feedback.textContent = '🎉 Sempurna! Urutan kode sudah benar!';
         feedback.className = 'feedback-area show correct';
+        
+        blocks.forEach((block, index) => {
+            setTimeout(() => {
+                block.style.animation = 'pulse 0.5s ease';
+            }, index * 100);
+        });
+        
         await updateDragDropStats(true);
     } else {
         feedback.textContent = `❌ Belum tepat. Hint: ${problem.hint}`;
@@ -1434,6 +1556,7 @@ async function checkDragSolution() {
     }
 }
 
+// ✅ RESET EXERCISE
 function resetDragExercise() {
     console.log('🔄 Resetting Drag & Drop exercise...');
     
@@ -1449,11 +1572,11 @@ function resetDragExercise() {
     
     // Clear solution area
     const solutionArea = document.getElementById('solution-area');
-    solutionArea.querySelectorAll('.code-block').forEach(b => b.remove());
-    solutionArea.innerHTML = '<h3>Area Solusi (Drag di sini)</h3><p class="empty-message">Drag blok kode ke sini</p>';
+    solutionArea.innerHTML = '<h3>Area Solusi (Drag di sini)</h3><p class="empty-message">Drag blok kode ke sini untuk menyusun program</p>';
     
     // Clear feedback
     document.getElementById('drag-feedback').className = 'feedback-area';
+    document.getElementById('drag-feedback').textContent = '';
     
     // Regenerate code blocks
     const codeBlocksArea = document.getElementById('code-blocks');
@@ -1469,7 +1592,7 @@ function resetDragExercise() {
         codeBlocksArea.appendChild(block);
     });
     
-    // Re-initialize drag & drop
+    // ✅ RE-INITIALIZE (dengan delay kecil untuk DOM update)
     setTimeout(() => {
         initDragAndDrop();
     }, 100);
