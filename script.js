@@ -1299,6 +1299,8 @@ function showMessage(container, type, message) {
 
 // ==================== DRAG & DROP ====================
 let draggedElement = null;
+let isDragInitialized = false; // Flag untuk mencegah multiple init
+
 const dragDropProblems = [
     {
         title: "Menyusun Fungsi Hitung Rata-rata",
@@ -1326,36 +1328,85 @@ const dragDropProblems = [
 ];
 let currentProblemIndex = 0;
 
+// Event handlers sebagai named functions (agar bisa di-remove)
+function handleDragStart(e) {
+    draggedElement = this;
+    this.classList.add('dragging');
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    
+    if (!draggedElement) return;
+    
+    // Hapus empty message jika ada
+    const emptyMsg = this.querySelector('.empty-message');
+    if (emptyMsg) emptyMsg.remove();
+    
+    // Clone element
+    const clone = draggedElement.cloneNode(true);
+    
+    // Attach event ke clone
+    clone.addEventListener('dragstart', handleDragStart);
+    clone.addEventListener('dragend', handleDragEnd);
+    
+    // Append ke drop zone
+    this.appendChild(clone);
+    
+    // Hapus original jika dari solution area
+    if (draggedElement.parentElement.id === 'solution-area') {
+        draggedElement.remove();
+    }
+}
+
 function initDragAndDrop() {
+    // 🔥 PENTING: Cegah multiple initialization
+    if (isDragInitialized) {
+        console.log('⚠️ Drag & Drop already initialized, skipping...');
+        return;
+    }
+    
+    console.log('✅ Initializing Drag & Drop...');
+    
+    // Attach event ke code blocks
     document.querySelectorAll('.code-block').forEach(el => {
-        el.addEventListener('dragstart', function(e) {
-            draggedElement = this;
-            this.classList.add('dragging');
-        });
-        el.addEventListener('dragend', function() {
-            this.classList.remove('dragging');
-        });
+        el.addEventListener('dragstart', handleDragStart);
+        el.addEventListener('dragend', handleDragEnd);
     });
+    
+    // Attach event ke drop zones (HANYA SEKALI!)
     document.querySelectorAll('.drag-zone').forEach(zone => {
-        zone.addEventListener('dragover', e => { e.preventDefault(); });
-        zone.addEventListener('drop', function(e) {
-            e.preventDefault();
-            if (draggedElement) {
-                const emptyMsg = this.querySelector('.empty-message');
-                if (emptyMsg) emptyMsg.remove();
-                const clone = draggedElement.cloneNode(true);
-                clone.addEventListener('dragstart', function(e) {
-                    draggedElement = this;
-                    this.classList.add('dragging');
-                });
-                clone.addEventListener('dragend', function() {
-                    this.classList.remove('dragging');
-                });
-                this.appendChild(clone);
-                if (draggedElement.parentElement.id === 'solution-area') draggedElement.remove();
-            }
-        });
+        zone.addEventListener('dragover', handleDragOver);
+        zone.addEventListener('drop', handleDrop);
     });
+    
+    isDragInitialized = true;
+}
+
+function cleanupDragAndDrop() {
+    console.log('🧹 Cleaning up Drag & Drop events...');
+    
+    // Remove event dari semua code blocks
+    document.querySelectorAll('.code-block').forEach(el => {
+        el.removeEventListener('dragstart', handleDragStart);
+        el.removeEventListener('dragend', handleDragEnd);
+    });
+    
+    // Remove event dari drop zones
+    document.querySelectorAll('.drag-zone').forEach(zone => {
+        zone.removeEventListener('dragover', handleDragOver);
+        zone.removeEventListener('drop', handleDrop);
+    });
+    
+    isDragInitialized = false;
 }
 
 async function checkDragSolution() {
@@ -1384,20 +1435,30 @@ async function checkDragSolution() {
 }
 
 function resetDragExercise() {
+    console.log('🔄 Resetting Drag & Drop exercise...');
+    
+    // Cleanup event listeners lama
+    cleanupDragAndDrop();
+    
+    // Pilih problem random
     currentProblemIndex = Math.floor(Math.random() * dragDropProblems.length);
     const problem = dragDropProblems[currentProblemIndex];
     
+    // Update title
     document.querySelector('#drag-drop .page-title').textContent = `Latihan Drag & Drop - ${problem.title}`;
     
+    // Clear solution area
     const solutionArea = document.getElementById('solution-area');
-    const codeBlocksArea = document.getElementById('code-blocks');
-    
     solutionArea.querySelectorAll('.code-block').forEach(b => b.remove());
     solutionArea.innerHTML = '<h3>Area Solusi (Drag di sini)</h3><p class="empty-message">Drag blok kode ke sini</p>';
     
+    // Clear feedback
     document.getElementById('drag-feedback').className = 'feedback-area';
     
+    // Regenerate code blocks
+    const codeBlocksArea = document.getElementById('code-blocks');
     codeBlocksArea.innerHTML = '<h3>Blok Kode Tersedia</h3>';
+    
     const shuffled = [...problem.blocks].sort(() => Math.random() - 0.5);
     shuffled.forEach(item => {
         const block = document.createElement('div');
@@ -1408,7 +1469,10 @@ function resetDragExercise() {
         codeBlocksArea.appendChild(block);
     });
     
-    setTimeout(() => initDragAndDrop(), 100);
+    // Re-initialize drag & drop
+    setTimeout(() => {
+        initDragAndDrop();
+    }, 100);
 }
 
 // ==================== CANVAS ====================
