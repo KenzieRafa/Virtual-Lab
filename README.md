@@ -26,10 +26,7 @@
 - [Deployment](#-deployment)
 - [Cara Penggunaan](#-cara-penggunaan)
 - [Struktur Database](#-struktur-database)
-- [Roadmap](#-roadmap-pengembangan)
-- [Contributing](#-contributing)
 - [Author](#-author)
-- [License](#-license)
 
 ---
 
@@ -679,14 +676,6 @@ netlify deploy --prod
 
 ---
 
-### Phase 3 (📋 Planned)
-- [ ] AI-powered code review
-- [ ] Collaborative coding rooms
-- [ ] Certification system
-- [ ] Integration dengan SIAK ITB
-
----
-
 ## 👤 Author
 
 **Kenzie Raffa Ardhana**
@@ -701,8 +690,6 @@ netlify deploy --prod
 - Dr. Fadhil Hidayat, S.Kom., M.T.
 
 **Mata Kuliah:** II3140 - Pengembangan Aplikasi Web dan Mobile
-
----
 
 <div align="center">
 
