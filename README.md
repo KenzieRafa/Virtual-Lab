@@ -624,21 +624,7 @@ netlify deploy --prod
 
 ## 💡 Cara Penggunaan
 
-### Mode 1: Guest (Tanpa Login)
-
-**Fitur yang Tersedia:**
-- ✅ Baca materi semua bab
-- ✅ Tonton video pembelajaran
-- ✅ Tulis & jalankan kode di editor
-- ✅ Lihat skor simulasi
-- ✅ Main drag & drop
-- ✅ Lihat visualisasi sorting
-
-**Keterbatasan:**
-- ❌ Progress tidak tersimpan
-- ❌ Tidak muncul di leaderboard
-
-### Mode 2: User Terdaftar (Recommended)
+### Mode: User Terdaftar (Recommended)
 
 **Registrasi:**
 1. Klik "Sign In" di header
