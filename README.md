@@ -415,14 +415,14 @@ python -m http.server 8000
 2. **Dapatkan API Credentials**
    - Masuk ke Settings → API
    - Copy:
-     - `Project URL`: `https://xxx.supabase.co`
-     - `anon public`: `eyJhbGci...`
+     - `Project URL`: `https://blkplgvhkgtsgnindwht.supabase.co`
+     - `anon public`: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsa3BsZ3Zoa2d0c2duaW5kd2h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NDM1NjMsImV4cCI6MjA3NTUxOTU2M30.HClTmehLskf_mgebwpRH9g-gyprqjIs8mn97HBOIT1k`
 
 3. **Update script.js**
    ```javascript
    // Ganti baris 1-2 di script.js
-   const SUPABASE_URL = 'https://xxx.supabase.co';
-   const SUPABASE_ANON_KEY = 'eyJhbGci...';
+   const SUPABASE_URL = 'https://blkplgvhkgtsgnindwht.supabase.co';
+   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsa3BsZ3Zoa2d0c2duaW5kd2h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NDM1NjMsImV4cCI6MjA3NTUxOTU2M30.HClTmehLskf_mgebwpRH9g-gyprqjIs8mn97HBOIT1k';
    ```
 
 4. **Save & Refresh**
