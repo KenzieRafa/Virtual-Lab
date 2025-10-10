@@ -49,14 +49,8 @@ header {
 .logo {
     display: flex;
     align-items: center;
-    gap: 1rem;
 }
-logo-image {
-    width: 50px;          /* Sesuaikan ukuran */
-    height: 50px;
-    object-fit: contain;  /* Jaga proporsi */
-    border-radius: 8px;   /* Opsional: sudut rounded */
-}
+
 
 .logo-text h1 {
     font-size: 1.5rem;  
