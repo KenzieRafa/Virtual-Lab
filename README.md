@@ -8,7 +8,7 @@
 
 **Platform pembelajaran interaktif pemrograman Python untuk mahasiswa TPB Institut Teknologi Bandung**
 
-[🌐 Live Demo](https://virtual-lab-five.vercel.app) | [📖 Documentation](#dokumentasi) | [🐛 Report Bug](https://github.com/KenzieRafa/Virtual-Lab/issues)
+[🌐 Live Demo](http://virtual-lab-five.vercel.app) | [📖 Documentation](#dokumentasi) | [🐛 Report Bug](https://github.com/KenzieRafa/Virtual-Lab/issues)
 
 </div>
 
@@ -21,11 +21,11 @@
 - [Fitur Baru V2.0](#-fitur-baru-v20)
 - [Teknologi](#-teknologi-yang-digunakan)
 - [Arsitektur Sistem](#-arsitektur-sistem)
-- [Prasyarat](#-prasyarat-sistem)
-- [Instalasi](#-instalasi--setup)
+- [Prasyarat Sistem](#-prasyarat-sistem)
+- [Instalasi & Setup](#-instalasi--setup)
+- [Struktur Database](#%EF%B8%8F-struktur-database)
 - [Deployment](#-deployment)
 - [Cara Penggunaan](#-cara-penggunaan)
-- [Struktur Database](#-struktur-database)
 - [Author](#-author)
 
 ---
@@ -690,6 +690,8 @@ netlify deploy --prod
 - Dr. Fadhil Hidayat, S.Kom., M.T.
 
 **Mata Kuliah:** II3140 - Pengembangan Aplikasi Web dan Mobile
+
+---
 
 <div align="center">
 
