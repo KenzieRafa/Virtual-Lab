@@ -441,47 +441,146 @@ python -m http.server 8000
 
 Menyimpan informasi profil pengguna.
 
-```sql
-CREATE TABLE user_profiles (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE NOT NULL,
-    display_name TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key (auto-generated) |
+| `user_id` | UUID | Foreign key ke `auth.users` |
+| `display_name` | TEXT | Nama tampilan user |
+| `created_at` | TIMESTAMP | Waktu pembuatan akun |
 
 ### Tabel 2: `user_progress`
 
 Menyimpan progress pembelajaran dan skor.
 
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key (auto-generated) |
+| `user_id` | UUID | Foreign key ke `auth.users` |
+| `completed_modules` | JSONB | Array bab yang sudah selesai `[1, 2, 3]` |
+| `chapter_scores` | JSONB | Object skor per bab `{"bab1": {...}}` |
+| `drag_drop_stats` | JSONB | Statistik drag & drop |
+| `created_at` | TIMESTAMP | Waktu pembuatan record |
+| `updated_at` | TIMESTAMP | Waktu update terakhir |
+
+### Setup Database (SQL Script Lengkap)
+
+Copy-paste script berikut ke **SQL Editor** di Supabase Dashboard:
+
 ```sql
-CREATE TABLE user_progress (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE NOT NULL,
-    completed_modules INTEGER[] DEFAULT '{}',
-    chapter_scores JSONB DEFAULT '{}',
-    drag_drop_stats JSONB DEFAULT '{"attempts": 0, "correct": 0}',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Cleanup (hapus tabel lama jika ada)
+DROP TABLE IF EXISTS user_progress CASCADE;
+DROP TABLE IF EXISTS user_profiles CASCADE;
+
+-- Create user_profiles table
+CREATE TABLE user_profiles (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  display_name TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id)
 );
-```
 
-### Row Level Security (RLS)
+-- Create user_progress table
+CREATE TABLE user_progress (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  completed_modules JSONB DEFAULT '[]'::jsonb,
+  chapter_scores JSONB DEFAULT '{}'::jsonb,
+  drag_drop_stats JSONB DEFAULT '{"attempts": 0, "correct": 0}'::jsonb,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id)
+);
 
-```sql
--- Enable RLS
+-- Enable Row Level Security
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 
--- Policy: User hanya bisa akses data sendiri
-CREATE POLICY "Users can read own profile"
+-- Policies for user_profiles
+CREATE POLICY "Enable read for authenticated users own data"
 ON user_profiles FOR SELECT
+TO authenticated
 USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own progress"
-ON user_progress FOR UPDATE
+CREATE POLICY "Enable insert for authenticated users"
+ON user_profiles FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Enable update for authenticated users"
+ON user_profiles FOR UPDATE
+TO authenticated
 USING (auth.uid() = user_id);
+
+CREATE POLICY "Enable read for all users (leaderboard)"
+ON user_profiles FOR SELECT
+TO authenticated
+USING (true);
+
+-- Policies for user_progress
+CREATE POLICY "Enable read for authenticated users own progress"
+ON user_progress FOR SELECT
+TO authenticated
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Enable insert for authenticated users progress"
+ON user_progress FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Enable update for authenticated users progress"
+ON user_progress FOR UPDATE
+TO authenticated
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Enable read for all users progress (leaderboard)"
+ON user_progress FOR SELECT
+TO authenticated
+USING (true);
+
+-- Create indexes for better performance
+CREATE INDEX idx_user_profiles_user_id ON user_profiles(user_id);
+CREATE INDEX idx_user_progress_user_id ON user_progress(user_id);
+
+-- Cleanup tabel yang tidak perlu
+DROP TABLE IF EXISTS chapter_scores CASCADE;
+DROP TABLE IF EXISTS completed_modules CASCADE;
+DROP TABLE IF EXISTS drag_drop_stats CASCADE;
 ```
+
+### Penjelasan Row Level Security (RLS)
+
+RLS memastikan keamanan data dengan aturan:
+
+1. **Read Own Data**: User hanya bisa baca data mereka sendiri
+   ```sql
+   USING (auth.uid() = user_id)
+   ```
+
+2. **Insert/Update Own Data**: User hanya bisa insert/update data mereka
+   ```sql
+   WITH CHECK (auth.uid() = user_id)
+   ```
+
+3. **Public Leaderboard**: Semua authenticated user bisa baca semua data (untuk leaderboard)
+   ```sql
+   USING (true)
+   ```
+
+### Verifikasi Database
+
+Setelah run SQL script, verifikasi dengan:
+
+1. Masuk ke **Table Editor** di Supabase
+2. Pastikan ada 2 tabel:
+   - ✅ `user_profiles`
+   - ✅ `user_progress`
+3. Cek **Policies** (RLS tab):
+   - ✅ 4 policies untuk `user_profiles`
+   - ✅ 4 policies untuk `user_progress`
+4. Cek **Indexes**:
+   - ✅ `idx_user_profiles_user_id`
+   - ✅ `idx_user_progress_user_id`
 
 ---
 
