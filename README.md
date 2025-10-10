@@ -215,7 +215,6 @@ Bab 1 (5/5 soal) ━━━━━ 85 / 100
 **Modal interaktif untuk first-time visitors**
 
 - ✅ Prompt untuk sign in/sign up
-- ✅ Opsi "Lanjutkan Tanpa Akun"
 - ✅ Session tracking (hanya muncul sekali)
 - ✅ Responsive untuk mobile
 
