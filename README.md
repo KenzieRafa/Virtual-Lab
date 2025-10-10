@@ -8,7 +8,7 @@
 
 **Platform pembelajaran interaktif pemrograman Python untuk mahasiswa TPB Institut Teknologi Bandung**
 
-[🌐 Live Demo](http://virtual-lab-five.vercel.app) | [📖 Documentation](#dokumentasi) | [🐛 Report Bug](https://github.com/KenzieRafa/Virtual-Lab/issues)
+[🌐 Live Demo](http://virtual-lab-five.vercel.app) | [📖 Documentation](https://github.com/KenzieRafa/Virtual-Lab.git) | [🐛 Report Bug](https://github.com/KenzieRafa/Virtual-Lab/issues)
 
 </div>
 
