@@ -233,7 +233,7 @@ if (newScore > currentBestScore) {
 
 ---
 
-## 🛠️ Teknologi yang Digunakan
+##  Teknologi yang Digunakan
 
 ### Frontend
 
@@ -275,7 +275,7 @@ if (newScore > currentBestScore) {
 
 ---
 
-## 🏗️ Arsitektur Sistem
+##  Arsitektur Sistem
 
 ```
 ┌─────────────────────────────────────────────────────────┐
