@@ -1,97 +1,616 @@
-# Virtual Lab - Berpikir Komputasional TPB ITB
-Link Deployment Wesbite VIRTUAL LAB: https://virtual-lab-five.vercel.app/
+# 📚 Virtual Lab - Berpikir Komputasional TPB ITB
 
-## Author / Tim Proyek
+<div align="center">
 
-| Nama       | NIM           |
-|------------|----------------------|
-| Kenzie Raffa Ardhana   | 18223127 |
+![Virtual Lab Banner](https://img.shields.io/badge/Virtual%20Lab-v2.0-blue?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-Learning-green?style=for-the-badge&logo=python)
+![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 
----
+**Platform pembelajaran interaktif pemrograman Python untuk mahasiswa TPB Institut Teknologi Bandung**
 
-## Deskripsi Proyek
+[🌐 Live Demo](https://virtual-lab-five.vercel.app) | [📖 Documentation](#dokumentasi) | [🐛 Report Bug](https://github.com/KenzieRafa/Virtual-Lab/issues)
 
-**Virtual Lab** adalah platform pembelajaran **interaktif berbasis web** yang dibuat khusus untuk mendukung mahasiswa TPB ITB dalam memahami dasar-dasar pemrograman Python.  
-Platform ini memungkinkan pengguna untuk:
-
-- Membaca materi yang disusun per bab  
-- Menjalankan simulasi kode Python langsung di browser (editor interaktif)  
-- Menyelesaikan latihan soal otomatis dengan feedback langsung  
-- Menonton video pendukung untuk setiap bab  
-- Menggunakan aktivitas tambahan seperti drag-and-drop & visualisasi untuk memperkuat konsep  
-
-Tujuan utama: membuat proses belajar pemrograman menjadi lebih intuitif, engaging, dan mudah diakses.
-
+</div>
 
 ---
 
-## Prasyarat Sistem
+## 📋 Daftar Isi
 
-Sebelum menjalankan proyek ini, pastikan:
-
-- Browser modern (Chrome, Firefox, Edge)  
-- Editor kode seperti VS Code (opsional, untuk modifikasi)  
-- Git (untuk clone dan version control)  
-- (Opsional) Akun GitHub  
-- (Opsional) Akun Vercel, jika kamu ingin deploy secara online  
+- [Tentang Proyek](#-tentang-proyek)
+- [Fitur Utama](#-fitur-utama)
+- [Fitur Baru V2.0](#-fitur-baru-v20)
+- [Teknologi](#-teknologi-yang-digunakan)
+- [Arsitektur Sistem](#-arsitektur-sistem)
+- [Prasyarat](#-prasyarat-sistem)
+- [Instalasi](#-instalasi--setup)
+- [Deployment](#-deployment)
+- [Cara Penggunaan](#-cara-penggunaan)
+- [Struktur Database](#-struktur-database)
+- [Roadmap](#-roadmap-pengembangan)
+- [Contributing](#-contributing)
+- [Author](#-author)
+- [License](#-license)
 
 ---
 
-## Cara Menjalankan Secara Lokal
+## 🎯 Tentang Proyek
 
-1. Clone repository ini:
-   ```bash
-   git clone https://github.com/KenzieRafa/Virtual-Lab.git
-   cd Virtual-Lab
+**Virtual Lab** adalah platform pembelajaran berbasis web yang dikembangkan untuk mendukung mata kuliah **Berpikir Komputasional** di TPB Institut Teknologi Bandung. Platform ini mengatasi tantangan pembelajaran pemrograman dengan menyediakan lingkungan belajar yang interaktif, mudah diakses, dan tidak memerlukan instalasi software tambahan.
+
+### 🎓 Latar Belakang
+
+Mata kuliah Berpikir Komputasional sering menjadi tantangan bagi mahasiswa baru karena:
+
+- 📚 Konsep pemrograman yang abstrak dan teoritis
+- 💻 Kebutuhan instalasi software yang kompleks (Python, IDE, dll)
+- ⏱️ Kurangnya feedback instan saat belajar
+- 📊 Kesulitan tracking progress pembelajaran
+
+Virtual Lab hadir sebagai solusi dengan menyediakan:
+- ✅ Akses langsung via browser tanpa instalasi
+- ✅ Feedback real-time untuk setiap kode yang ditulis
+- ✅ Sistem tracking progress otomatis
+- ✅ Pembelajaran yang gamified dan interaktif
+
+### 📚 Kurikulum
+
+Platform mengikuti kurikulum resmi mata kuliah dengan 5 bab pembelajaran:
+
+| Bab | Topik | Soal |
+|-----|-------|------|
+| 1️⃣ | **Fondasi Pemrograman Python** | 5 |
+| 2️⃣ | **Mengontrol Alur Program** | 5 |
+| 3️⃣ | **Bekerja dengan Kumpulan Data** | 5 |
+| 4️⃣ | **Struktur Data Lanjutan** | 5 |
+| 5️⃣ | **Membuat Kode Modular dengan Fungsi** | 5 |
+
+**Total: 25 Soal Latihan + Aktivitas Interaktif**
+
+---
+
+## ✨ Fitur Utama
+
+### 1️⃣ Materi Pembelajaran Terstruktur
+- 📖 5 bab lengkap dengan penjelasan detail
+- 🎥 Video pembelajaran terintegrasi (YouTube)
+- 📝 Tujuan pembelajaran yang jelas setiap bab
+- ✅ Tombol "Tandai Selesai" untuk tracking
+
+### 2️⃣ Editor Kode Interaktif
+- 💻 Code editor dengan syntax highlighting
+- ▶️ Simulasi eksekusi Python di browser
+- 📊 Console output real-time
+- 🔄 Tombol Reset dan auto-save
+- ⌨️ Keyboard shortcuts (Ctrl+Enter)
+
+### 3️⃣ Sistem Latihan Soal
+- 📝 25 soal berbasis kasus nyata
+- 🎯 Penilaian otomatis (0-100)
+- 🏆 Badge warna berdasarkan performa:
+  - 🟢 **Excellent** (≥70): Hijau
+  - 🟡 **Good** (40-69): Kuning
+  - 🔴 **Need Improvement** (<40): Merah
+
+### 4️⃣ Aktivitas Tambahan
+- 🖱️ **Drag & Drop**: Susun blok kode dengan cara drag
+- 📈 **Visualisasi Algoritma**: Lihat sorting algorithm secara visual
+  - Bubble Sort
+  - Selection Sort
+  - Insertion Sort
+- 🎨 Canvas interaktif dengan animasi real-time
+
+### 5️⃣ Mobile Responsive
+- 📱 Hamburger menu untuk navigasi mobile
+- 👆 Touch events untuk drag & drop
+- 🎨 UI adaptif (Desktop, Tablet, Mobile)
+
+---
+
+## 🆕 Fitur Baru V2.0
+
+### 🔐 1. Autentikasi Multi-Metode
+
+**Implementasi server-side authentication dengan Supabase Auth**
+
+#### a) Email & Password Authentication
+```javascript
+// Register
+const { user, error } = await supabase.auth.signUp({
+  email: 'student@itb.ac.id',
+  password: 'secure_password',
+  options: {
+    data: { display_name: 'Kenzie R' }
+  }
+})
+
+// Login
+const { user, error } = await supabase.auth.signInWithPassword({
+  email: 'student@itb.ac.id',
+  password: 'secure_password'
+})
+```
+
+#### b) Google OAuth Integration
+```javascript
+// Sign in with Google
+await supabase.auth.signInWithOAuth({
+  provider: 'google',
+  options: {
+    redirectTo: 'https://virtual-lab-five.vercel.app'
+  }
+})
+```
+
+**Keunggulan:**
+- 🔒 Secure session management dengan JWT
+- 📧 Email verification otomatis
+- 🔄 Auto-sync progress antar device
+- 🛡️ Row Level Security (RLS) di database
+
+### 💾 2. Penyimpanan State Pengguna
+
+**Database: PostgreSQL (Supabase)**
+
+#### a) Progress Pembelajaran
+- ✅ Bab yang sudah diselesaikan
+- ✅ Timestamp setiap pembelajaran
+- ✅ Badge "Pembelajaran Selesai"
+
+#### b) Hasil Simulasi & Nilai
+```javascript
+// Auto-save skor
+{
+  "bab1": { 
+    "soal1": 100, 
+    "soal2": 85, 
+    "soal3": 90,
+    "soal4": 100,
+    "soal5": 75 
+  },
+  "bab2": { 
+    "soal1": 70, 
+    "soal2": 95 
+  }
+}
+```
+
+#### c) Statistik Aktivitas
+- ✅ Jumlah percobaan drag & drop
+- ✅ Tingkat akurasi jawaban
+- ✅ Best score tracking per soal
+- ✅ Total skor akumulatif per bab
+
+### 🏆 3. Leaderboard Real-time
+
+**Kompetisi sehat dengan mahasiswa lain!**
+
+- 🥇 Badge khusus Top 3: Gold 🥇, Silver 🥈, Bronze 🥉
+- 📊 Ranking berdasarkan total nilai (max 500 poin)
+- 📈 Progress modul yang diselesaikan
+- 🔄 Update real-time via Supabase Realtime
+- 👥 Anonymous leaderboard (display name only)
+
+**Formula Skor:**
+```
+Total Skor = Σ(Rata-rata per Bab)
+Maximum = 100 + 100 + 100 + 100 + 100 = 500 poin
+```
+
+### 👤 4. Academic Progress Page
+
+**Dashboard monitoring pembelajaran lengkap**
+
+```
+📚 Modul Selesai: 3 / 5 bab
+📝 Total Nilai: 385 / 500 poin
+🎯 Akurasi Drag & Drop: 85%
+
+Bab 1 (5/5 soal) ━━━━━ 85 / 100
+  ✓ Soal 1.1 ━━━━━ 100 ⭐ Perfect!
+  ○ Soal 1.2 ━━━━━ 85
+  ○ Soal 1.3 ━━━━━ 90
+  ✓ Soal 1.4 ━━━━━ 100 ⭐ Perfect!
+  ○ Soal 1.5 ━━━━━ 75
+```
+
+### 🎉 5. Welcome Modal
+
+**Modal interaktif untuk first-time visitors**
+
+- ✅ Prompt untuk sign in/sign up
+- ✅ Opsi "Lanjutkan Tanpa Akun"
+- ✅ Session tracking (hanya muncul sekali)
+- ✅ Responsive untuk mobile
+
+### 🔄 6. Auto-Save System
+
+**Tidak perlu khawatir lupa save!**
+
+```javascript
+// Auto-save hanya jika skor lebih tinggi
+if (newScore > currentBestScore) {
+  await saveToDatabase(userId, problemId, newScore);
+  showNotification('✅ Progress tersimpan!');
+}
+```
+
+---
+
+## 🛠️ Teknologi yang Digunakan
+
+### Frontend
+
+| Teknologi | Versi | Kegunaan |
+|-----------|-------|----------|
+| HTML5 | - | Struktur halaman semantic |
+| CSS3 | - | Modern styling dengan CSS Variables |
+| JavaScript | ES6+ | Vanilla JS untuk logika interaktif |
+| Canvas API | - | Visualisasi algoritma sorting |
+
+**Why Vanilla JS?**
+- ⚡ Lightweight & fast loading
+- 📦 No build tools required
+- 🎯 Learning-friendly untuk pemula
+- 🔧 Easy to customize
+
+### Backend (Serverless)
+
+| Teknologi | Versi | Kegunaan |
+|-----------|-------|----------|
+| Supabase | v2.x | Backend-as-a-Service (BaaS) |
+| PostgreSQL | 14 | Relational database |
+| Supabase Auth | - | Authentication & OAuth |
+| Supabase Realtime | - | Real-time data sync |
+
+**Supabase Features:**
+- ✅ Built-in authentication (Email + OAuth)
+- ✅ PostgreSQL dengan Row Level Security
+- ✅ Real-time subscriptions
+- ✅ Auto-generated REST API
+- ✅ Free tier: 500MB database, 2GB bandwidth
+
+### Deployment
+
+| Service | Kegunaan | Status |
+|---------|----------|--------|
+| Vercel | Frontend hosting | ✅ Active |
+| Supabase Cloud | Backend serverless | ✅ Active |
+
+---
+
+## 🏗️ Arsitektur Sistem
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    CLIENT (Browser)                      │
+│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐ │
+│  │  index.html │  │  styles.css  │  │   script.js    │ │
+│  │             │  │              │  │                │ │
+│  │  Structure  │  │   Styling    │  │  Logic + Auth  │ │
+│  └─────────────┘  └──────────────┘  └────────────────┘ │
+└─────────────────────────────────────────────────────────┘
+                            │
+                            │ HTTPS / WebSocket
+                            ▼
+┌─────────────────────────────────────────────────────────┐
+│              SUPABASE (Backend Serverless)               │
+│  ┌──────────────────┐  ┌─────────────────────────────┐ │
+│  │  Supabase Auth   │  │    PostgreSQL Database      │ │
+│  │  • Email/Pass    │  │  • user_profiles            │ │
+│  │  • Google OAuth  │  │  • user_progress            │ │
+│  │  • JWT Sessions  │  │  • Row Level Security (RLS) │ │
+│  └──────────────────┘  └─────────────────────────────┘ │
+│                                                          │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │         Supabase Realtime (WebSocket)            │  │
+│  │         • Leaderboard live updates               │  │
+│  │         • Progress synchronization               │  │
+│  └──────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Data Flow
+
+```
+User Action (Run Code) 
+    ↓
+Simulate Execution (JavaScript)
+    ↓
+Calculate Score
+    ↓
+Check if score > best_score
+    ↓
+Save to Supabase (if higher)
+    ↓
+Update UI + Leaderboard
+```
+
+---
+
+## 📦 Prasyarat Sistem
+
+### Required:
+- ✅ **Browser Modern**: Chrome 90+, Firefox 88+, Edge 90+, Safari 14+
+- ✅ **Git**: untuk clone repository ([Download](https://git-scm.com/))
+- ✅ **Code Editor**: VS Code, Sublime, atau sejenisnya ([Download VS Code](https://code.visualstudio.com/))
+
+### Optional (untuk fitur database):
+- ✅ **Akun Supabase**: Gratis di [supabase.com](https://supabase.com)
+- ✅ **Akun Google Cloud**: Untuk Google OAuth ([console.cloud.google.com](https://console.cloud.google.com))
+- ✅ **Akun Vercel/Netlify**: Untuk deployment ([vercel.com](https://vercel.com) / [netlify.com](https://netlify.com))
+
+---
+
+## 🚀 Instalasi & Setup
+
+### Step 1: Clone Repository
+
+```bash
+# Clone repository
+git clone https://github.com/KenzieRafa/Virtual-Lab.git
+
+# Masuk ke folder proyek
+cd Virtual-Lab
+
+# (Opsional) Buat branch baru untuk development
+git checkout -b development
+```
+
+### Step 2: Struktur File
+
+```
+Virtual-Lab/
+├── index.html          # File HTML utama
+├── styles.css          # File CSS styling
+├── script.js           # File JavaScript logic
+├── README.md           # Dokumentasi
+└── .gitignore          # (Opsional) Ignore files
+```
+
+### Step 3: Jalankan Secara Lokal
+
+**Metode 1: Double-click**
+```bash
+# Windows
+start index.html
+
+# macOS
+open index.html
+
+# Linux
+xdg-open index.html
+```
+
+**Metode 2: VS Code Live Server**
+```bash
+# Install extension "Live Server" di VS Code
+# Klik kanan index.html > "Open with Live Server"
+```
+
+**Metode 3: Python HTTP Server**
+```bash
+# Python 3
+python -m http.server 8000
+
+# Buka browser: http://localhost:8000
+```
+
+### Step 4: Konfigurasi Supabase
+
+⚠️ **PENTING**: Tanpa konfigurasi Supabase, fitur berikut TIDAK akan berfungsi:
+- ❌ Autentikasi (Sign In/Sign Up)
+- ❌ Penyimpanan progress
+- ❌ Auto-save skor
+- ❌ Leaderboard
+- ❌ Academic Progress page
+
+#### Setup Supabase:
+
+1. **Buat Project Supabase**
+   - Login ke [Supabase Dashboard](https://app.supabase.com)
+   - Klik "New Project"
+   - Isi form:
+     - Project name: `virtual-lab`
+     - Database password: (buat password kuat)
+     - Region: `Southeast Asia (Singapore)`
+   - Klik "Create new project"
+
+2. **Dapatkan API Credentials**
+   - Masuk ke Settings → API
+   - Copy:
+     - `Project URL`: `https://xxx.supabase.co`
+     - `anon public`: `eyJhbGci...`
+
+3. **Update script.js**
+   ```javascript
+   // Ganti baris 1-2 di script.js
+   const SUPABASE_URL = 'https://xxx.supabase.co';
+   const SUPABASE_ANON_KEY = 'eyJhbGci...';
    ```
 
-2. Buka `index.html` menggunakan browser — tidak perlu server khusus.
-
-3. (Opsional) Edit materi, CSS, atau logika dengan VS Code:
-   - File `index.html` → struktur tampilan halaman  
-   - File `styles.css` → styling & tema  
-   - File `script.js` → logika interaktif, materi, soal  
+4. **Save & Refresh**
+   - Save file `script.js`
+   - Refresh browser (F5)
+   - Cek console: `✅ Supabase connected successfully`
 
 ---
 
-## Cara Deploy (ke Vercel)
+## 🗄️ Struktur Database
 
-1. Login ke [Vercel](https://vercel.com).  
-2. Pilih **New Project** → import repository `KenzieRafa/Virtual-Lab`.  
-3. Deploy → akan menghasilkan URL seperti: `virtual-lab-five.vercel.app`.  
-4. Setelah deploy berhasil, aplikasi bisa diakses secara publik di internet.
+### Tabel 1: `user_profiles`
+
+Menyimpan informasi profil pengguna.
+
+```sql
+CREATE TABLE user_profiles (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE NOT NULL,
+    display_name TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+### Tabel 2: `user_progress`
+
+Menyimpan progress pembelajaran dan skor.
+
+```sql
+CREATE TABLE user_progress (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE NOT NULL,
+    completed_modules INTEGER[] DEFAULT '{}',
+    chapter_scores JSONB DEFAULT '{}',
+    drag_drop_stats JSONB DEFAULT '{"attempts": 0, "correct": 0}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+### Row Level Security (RLS)
+
+```sql
+-- Enable RLS
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
+
+-- Policy: User hanya bisa akses data sendiri
+CREATE POLICY "Users can read own profile"
+ON user_profiles FOR SELECT
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own progress"
+ON user_progress FOR UPDATE
+USING (auth.uid() = user_id);
+```
 
 ---
 
-## Fitur Utama
+## 🌐 Deployment
 
-- 📚 **Materi Terstruktur**: Beberapa bab dari dasar hingga fungsi modular  
-- 🖥️ **Editor Kode Interaktif**: Menulis & mencoba kode Python dalam browser  
-- 📝 **Latihan Soal Terintegrasi**: Skor & umpan balik otomatis  
-- 🎥 **Video Pendukung per Bab**  
-- 🎮 **Aktivitas Interaktif**: Drag-and-drop & visualisasi  
-- 🌙 **UI Modern & Responsif**: tema gelap, mobile friendly, animasi halus  
+### Option 1: Deploy ke Vercel (Recommended)
+
+**Why Vercel?**
+- ⚡ Super fast (global CDN)
+- 🆓 Free tier unlimited
+- 🔄 Auto-deploy on git push
+- 🌐 Custom domain support
+
+**Steps:**
+
+1. **Push ke GitHub**
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit with auth features"
+   git remote add origin https://github.com/USERNAME/Virtual-Lab.git
+   git push -u origin main
+   ```
+
+2. **Deploy via Vercel Dashboard**
+   - Login ke [vercel.com](https://vercel.com)
+   - Klik "Add New..." → "Project"
+   - Import repository `Virtual-Lab`
+   - Framework Preset: **Other**
+   - Klik "Deploy"
+   - ✅ Done! Website live di `https://virtual-lab-xxx.vercel.app`
+
+### Option 2: Deploy ke Netlify
+
+```bash
+# Install Netlify CLI
+npm install -g netlify-cli
+
+# Deploy
+netlify deploy --prod
+```
 
 ---
 
-## Catatan & Tips Pengembangan
+## 💡 Cara Penggunaan
 
-- Editor di sini bertipe **simulasi**, bukan interpreter Python sesungguhnya  
-- Jika ingin menambah soal atau materi baru: ubah objek `problemsData` di `script.js`  
-- Untuk styling tambahan atau modifikasi tema, edit `styles.css`  
-- Gunakan browser desktop untuk pengalaman optimal  
-- Backup perubahan sebelum deploy ulang agar tidak kehilangan data  
+### Mode 1: Guest (Tanpa Login)
+
+**Fitur yang Tersedia:**
+- ✅ Baca materi semua bab
+- ✅ Tonton video pembelajaran
+- ✅ Tulis & jalankan kode di editor
+- ✅ Lihat skor simulasi
+- ✅ Main drag & drop
+- ✅ Lihat visualisasi sorting
+
+**Keterbatasan:**
+- ❌ Progress tidak tersimpan
+- ❌ Tidak muncul di leaderboard
+
+### Mode 2: User Terdaftar (Recommended)
+
+**Registrasi:**
+1. Klik "Sign In" di header
+2. Klik tab "Sign Up"
+3. Isi form (nama, email, password)
+4. Verifikasi email
+5. Login
+
+**Atau Sign In dengan Google:**
+1. Klik "Sign In" → "Continue with Google"
+2. Pilih akun Google
+3. Done! Auto-login
+
+**Cara Belajar Efektif:**
+
+1. **Baca Materi** 📖
+   - Pilih Bab → Pahami konsep → Tonton video
+   - Klik "Tandai Pembelajaran Selesai" ✓
+
+2. **Kerjakan Latihan** ✍️
+   - Pilih soal → Tulis kode → Jalankan (Ctrl+Enter)
+   - Target skor ≥70 untuk badge hijau
+
+3. **Latihan Drag & Drop** 🎯
+   - Susun blok kode dengan urutan benar
+   - Gunakan hint jika kesulitan
+
+4. **Visualisasi Algoritma** 📊
+   - Generate array → Pilih algoritma → Mulai sorting
+   - Amati proses secara visual
+
+5. **Monitoring Progress** 📈
+   - Cek "Academic Progress"
+   - Target: ≥400 poin (Excellent)
 
 ---
 
-## Referensi
-
-- Materi kuliah *Berpikir Komputasional* TPB ITB  
-- Python Documentation — https://docs.python.org/3  
-- MDN Web Docs — https://developer.mozilla.org  
-- Vercel Documentation — https://vercel.com/docs  
+### Phase 3 (📋 Planned)
+- [ ] AI-powered code review
+- [ ] Collaborative coding rooms
+- [ ] Certification system
+- [ ] Integration dengan SIAK ITB
 
 ---
 
-Terima kasih telah menggunakan **Virtual Lab** 🎉  
-Selamat belajar dan semoga proyek ini bermanfaat!  
+## 👤 Author
+
+**Kenzie Raffa Ardhana**
+- NIM: 18223127
+- Program Studi: Sistem dan Teknologi Informasi
+- Institusi: Institut Teknologi Bandung
+- GitHub: [@KenzieRafa](https://github.com/KenzieRafa)
+
+**Dosen Pembimbing:**
+- Daniel Wiyogo Dwiputro, S.T., M.T.
+- Atina Putri, S.Kom., M.T.
+- Dr. Fadhil Hidayat, S.Kom., M.T.
+
+**Mata Kuliah:** II3140 - Pengembangan Aplikasi Web dan Mobile
+
+---
+
+<div align="center">
+
+**Terima kasih telah menggunakan Virtual Lab!** 🎉
+
+Selamat belajar dan semoga proyek ini bermanfaat!
+
+[⬆ Back to Top](#-virtual-lab---berpikir-komputasional-tpb-itb)
+
+</div>
