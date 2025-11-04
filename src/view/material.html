@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Virtual Lab - Berpikir Komputasional TPB ITB</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../style/chapter.css">
+    <link rel="stylesheet" href="../style/auth.css">
+    <link rel="stylesheet" href="../style/responsive.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -17,23 +19,20 @@
         </button>
         
         <div class="logo">
-            <div class="logo-icon">
-                <div class="logo-text">
-                    <h1>VIRTUAL LAB</h1>
-                    <p>by Kenzie R</p>
-                </div>
-            </div>
+            <a href="/">
+                <img src="../asset/logo.png" alt="StringBox Logo" class="logo-img">
+            </a>
         </div>
         
         <nav id="mainNav" class="main-nav">
             <ul>
-                <li><button onclick="showPage('home')" class="nav-btn active" data-page="home">Beranda</button></li>
-                <li><button onclick="showPage('material')" class="nav-btn" data-page="material">Materi</button></li>
-                <li><button onclick="showPage('practice')" class="nav-btn" data-page="practice">Latihan</button></li>
-                <li><button onclick="showPage('drag-drop')" class="nav-btn" data-page="drag-drop">Drag&Drop</button></li>
-                <li><button onclick="showPage('canvas-viz')" class="nav-btn" data-page="canvas-viz">Visualisasi</button></li>
-                <li><button onclick="showPage('leaderboard')" class="nav-btn" data-page="leaderboard">Leaderboard</button></li>
-                <li><button onclick="showPage('profile')" class="nav-btn" data-page="profile">Academic Progress</button></li>
+                <li><button onclick="window.location.href='/'" class="nav-btn" data-page="home">Beranda</button></li>
+                <li><button onclick="window.location.href='material.html'" class="nav-btn active" data-page="material">Materi</button></li>
+                <li><button onclick="window.location.href='practice.html'" class="nav-btn" data-page="practice">Latihan</button></li>
+                <li><button onclick="window.location.href='dragdrop.html'" class="nav-btn" data-page="drag-drop">Drag&Drop</button></li>
+                <li><button onclick="window.location.href='canvas.html'" class="nav-btn" data-page="canvas-viz">Visualisasi</button></li>
+                <li><button onclick="window.location.href='leaderboard.html'" class="nav-btn" data-page="leaderboard">Leaderboard</button></li>
+                <li><button onclick="window.location.href='profile.html'" class="nav-btn" data-page="profile">Academic Progress</button></li>
             </ul>
         </nav>
         
@@ -102,7 +101,7 @@
 </div>
     <div id="welcomeModal" class="modal" style="display: none;">
         <div class="modal-content welcome-content">
-            <h2>Selamat Datang di Virtual Lab! 🎉</h2>
+            <h2>Selamat Datang di Stringbox! 🎉</h2>
             <p>Untuk menyimpan progress pembelajaran Anda, silakan Sign In atau Sign Up terlebih dahulu.</p>
             <div class="welcome-buttons">
                 <button onclick="showAuthModal('signin')" class="welcome-btn">Sign In</button>
@@ -113,85 +112,7 @@
     </div>
 
     <main>
-        <section id="home" class="page active">
-            <div class="hero-section">
-                <h1>Selamat Datang di Virtual Lab Berpikir Komputasional</h1>
-                <p class="hero-description">Platform pembelajaran interaktif untuk mahasiswa TPB Institut Teknologi Bandung. Mulai perjalanan Anda dalam dunia pemrograman Python dengan cara yang menyenangkan dan interaktif.</p>
-                
-                <button id="start-learning" class="cta-button" onclick="showPage('material')">
-                    Mulai Belajar Sekarang
-                </button>
-            </div>
-
-            <div class="features-section">
-                <div class="feature-row">
-                    <div class="feature-number">01</div>
-                    <div class="feature-content">
-                        <h3>Materi Lengkap</h3>
-                        <p>5 bab pembelajaran dari dasar hingga mahir, dengan penjelasan konsep yang mudah dipahami dan contoh praktis untuk setiap topik pembelajaran.</p>
-                    </div>
-                </div>
-                
-                <div class="feature-row">
-                    <div class="feature-number">02</div>
-                    <div class="feature-content">
-                        <h3>Editor Kode Interaktif</h3>
-                        <p>Tulis dan jalankan kode Python langsung di browser tanpa instalasi apapun. Lihat hasil secara real-time dengan feedback instan.</p>
-                    </div>
-                </div>
-                
-                <div class="feature-row">
-                    <div class="feature-number">03</div>
-                    <div class="feature-content">
-                        <h3>Latihan Terintegrasi</h3>
-                        <p>Soal-soal praktik yang disesuaikan dengan materi perkuliahan, lengkap dengan sistem penilaian otomatis dan panduan step-by-step.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="curriculum-section">
-                <h2>Kurikulum Pembelajaran</h2>
-                <div class="curriculum-timeline">
-                    <div class="curriculum-item">
-                        <div class="curriculum-marker">1</div>
-                        <div class="curriculum-content">
-                            <h4>Fondasi Pemrograman</h4>
-                            <p>Variabel, tipe data, input/output</p>
-                        </div>
-                    </div>
-                    <div class="curriculum-item">
-                        <div class="curriculum-marker">2</div>
-                        <div class="curriculum-content">
-                            <h4>Kontrol Alur</h4>
-                            <p>Percabangan dan perulangan</p>
-                        </div>
-                    </div>
-                    <div class="curriculum-item">
-                        <div class="curriculum-marker">3</div>
-                        <div class="curriculum-content">
-                            <h4>Kumpulan Data</h4>
-                            <p>String dan list manipulation</p>
-                        </div>
-                    </div>
-                    <div class="curriculum-item">
-                        <div class="curriculum-marker">4</div>
-                        <div class="curriculum-content">
-                            <h4>Struktur Lanjutan</h4>
-                            <p>List 2D dan nested loops</p>
-                        </div>
-                    </div>
-                    <div class="curriculum-item">
-                        <div class="curriculum-marker">5</div>
-                        <div class="curriculum-content">
-                            <h4>Fungsi</h4>
-                            <p>Kode modular dan reusable</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="material" class="page">
+        <section id="material" class="page active">
             <h1 class="page-title">Materi Pembelajaran</h1>
             
             <div class="chapter-list">
@@ -458,227 +379,9 @@
                 </article>
             </div>
         </section>
-
-        <section id="practice" class="page">
-            <h1 class="page-title">Latihan Praktik</h1>
-            <div id="chapter-selection" class="chapter-selection">
-                <div class="selection-intro">
-                    <h2>Pilih Bab Untuk Berlatih</h2>
-                    <p>Setiap bab memiliki 5 soal latihan yang dapat Anda kerjakan dengan editor kode interaktif</p>
-                </div>
-                
-                <div class="chapter-menu">
-                    <button class="chapter-option" onclick="showChapterProblems(1)">
-                        <div class="option-number">01</div>
-                        <div class="option-details">
-                            <h3>Fondasi Pemrograman</h3>
-                            <p>Input, tipe data, operasi dasar</p>
-                            <span class="problem-indicator">5 Soal Tersedia</span>
-                        </div>
-                    </button>
-                    
-                    <button class="chapter-option" onclick="showChapterProblems(2)">
-                        <div class="option-number">02</div>
-                        <div class="option-details">
-                            <h3>Kontrol Alur Program</h3>
-                            <p>Percabangan dan perulangan</p>
-                            <span class="problem-indicator">5 Soal Tersedia</span>
-                        </div>
-                    </button>
-                    
-                    <button class="chapter-option" onclick="showChapterProblems(3)">
-                        <div class="option-number">03</div>
-                        <div class="option-details">
-                            <h3>Kumpulan Data</h3>
-                            <p>String dan list manipulation</p>
-                            <span class="problem-indicator">5 Soal Tersedia</span>
-                        </div>
-                    </button>
-                    
-                    <button class="chapter-option" onclick="showChapterProblems(4)">
-                        <div class="option-number">04</div>
-                        <div class="option-details">
-                            <h3>Struktur Data Lanjutan</h3>
-                            <p>List 2D dan nested loops</p>
-                            <span class="problem-indicator">5 Soal Tersedia</span>
-                        </div>
-                    </button>
-                    
-                    <button class="chapter-option" onclick="showChapterProblems(5)">
-                        <div class="option-number">05</div>
-                        <div class="option-details">
-                            <h3>Fungsi</h3>
-                            <p>Kode modular dan reusable</p>
-                            <span class="problem-indicator">5 Soal Tersedia</span>
-                        </div>
-                    </button>
-                </div>
-            </div>
-
-            <div id="problems-container" class="problems-workspace" style="display: none;">
-                <div class="workspace-header">
-                    <button class="back-button" onclick="backToChapterSelection()">← Kembali ke Pilihan Bab</button>
-                    <h2 id="current-chapter-title"></h2>
-                </div>
-                
-                <div id="dynamic-problems">
-                </div>
-            </div>
-        </section>
-
-        <section id="drag-drop" class="page">
-            <h1 class="page-title">Latihan Drag & Drop - Susun Kode</h1>
-            
-            <div class="drag-intro">
-                <p>Susun blok kode berikut menjadi program yang benar dengan cara drag & drop!</p>
-            </div>
-
-            <div class="drag-container">
-                <div class="drag-zone" id="code-blocks">
-                    <h3>Blok Kode Tersedia</h3>
-                    <div class="code-block" draggable="true" data-id="1">
-                        <code>def hitung_rata(nilai):</code>
-                    </div>
-                    <div class="code-block" draggable="true" data-id="2">
-                        <code>    total = sum(nilai)</code>
-                    </div>
-                    <div class="code-block" draggable="true" data-id="3">
-                        <code>    return total / len(nilai)</code>
-                    </div>
-                    <div class="code-block" draggable="true" data-id="4">
-                        <code>nilai_siswa = [80, 90, 75, 85]</code>
-                    </div>
-                    <div class="code-block" draggable="true" data-id="5">
-                        <code>print(f"Rata-rata: {hitung_rata(nilai_siswa)}")</code>
-                    </div>
-                </div>
-
-                <div class="drag-zone drop-zone" id="solution-area">
-                    <h3>Area Solusi (Drag di sini)</h3>
-                    <p class="empty-message">Drag blok kode ke sini untuk menyusun program</p>
-                </div>
-            </div>
-
-            <div class="drag-controls">
-                <button onclick="checkDragSolution()" class="check-button">Periksa Jawaban</button>
-                <button onclick="resetDragExercise()" class="reset-button">Reset</button>
-            </div>
-
-            <div id="drag-feedback" class="feedback-area"></div>
-        </section>
-
-        <section id="canvas-viz" class="page">
-            <h1 class="page-title">Visualisasi Algoritma Sorting</h1>
-            
-            <div class="canvas-intro">
-                <p>Lihat bagaimana algoritma sorting bekerja secara visual! Pilih algoritma dan tekan "Mulai Sorting" untuk melihat animasinya.</p>
-            </div>
-
-            <div class="canvas-controls">
-                <button onclick="generateRandomArray()" class="canvas-btn">Generate Array Baru</button>
-                <select id="sortAlgorithm" class="canvas-select">
-                    <option value="bubble">Bubble Sort</option>
-                    <option value="selection">Selection Sort</option>
-                    <option value="insertion">Insertion Sort</option>
-                </select>
-                <button onclick="startSorting()" class="canvas-btn primary">Mulai Sorting</button>
-                <button onclick="resetCanvas()" class="canvas-btn">Reset</button>
-            </div>
-
-            <div class="canvas-container">
-                <canvas id="sortCanvas" width="800" height="400"></canvas>
-            </div>
-
-            <div class="canvas-info">
-                <div class="info-item">
-                    <span class="info-label">Status:</span>
-                    <span id="sortStatus">Siap</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Perbandingan:</span>
-                    <span id="comparisons">0</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Swap:</span>
-                    <span id="swaps">0</span>
-                </div>
-            </div>
-
-            <div class="algorithm-explanation">
-                <h3>Penjelasan Algoritma</h3>
-                <div id="algoExplanation">
-                    <p><strong>Bubble Sort:</strong> Membandingkan elemen bersebelahan dan menukarnya jika urutannya salah. Proses ini diulang hingga tidak ada lagi pertukaran.</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="leaderboard" class="page">
-            <h1 class="page-title">🏆 Leaderboard</h1>
-            
-            <div class="leaderboard-container">
-                <div class="leaderboard-intro">
-                    <p>Lihat ranking mahasiswa berdasarkan total nilai latihan!</p>
-                </div>
-                
-                <div id="leaderboardList" class="leaderboard-list">
-                    <div class="loading-message">Memuat data leaderboard...</div>
-                </div>
-            </div>
-        </section>
-
-        <section id="profile" class="page">
-            <h1 class="page-title">🎓 Academic Progress</h1>
-            
-            <div class="profile-container">
-                <div class="profile-header">
-                    <div class="profile-avatar">
-                        <span id="profileInitial">?</span>
-                    </div>
-                    <div class="profile-info">
-                        <h2 id="profileName">Guest User</h2>
-                        <p id="profileEmail">-</p>
-                    </div>
-                </div>
-                
-                <div class="profile-stats">
-                    <div class="stat-card">
-                        <div class="stat-icon">📚</div>
-                        <div class="stat-content">
-                            <h3>Modul Selesai</h3>
-                            <p class="stat-value" id="completedModules">0 / 5</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">📝</div>
-                        <div class="stat-content">
-                            <h3>Total Nilai Latihan</h3>
-                            <p class="stat-value" id="totalScore">0</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">🎯</div>
-                        <div class="stat-content">
-                            <h3>Akurasi Drag & Drop</h3>
-                            <p class="stat-value" id="dragDropAccuracy">0%</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="progress-details">
-                    <h3>Detail Progress per Bab</h3>
-                    <div id="chapterScoresList" class="chapter-scores-list">
-                    </div>
-                </div>
-                
-                <div class="profile-actions">
-                    <button onclick="signOut()" class="sign-out-button">Sign Out</button>
-                </div>
-            </div>
-        </section>
     </main>
 
-    <script src="script.js"></script>
+    <script src="../route/global.js" type="module"></script>
+    <script src="../route/material.js" type="module"></script>
 </body>
 </html>

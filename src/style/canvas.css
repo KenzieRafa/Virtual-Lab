@@ -1,0 +1,116 @@
+@import url("styles.css");
+
+/* ==================== CANVAS VISUALIZATION PAGE ==================== */
+.canvas-intro {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(59, 130, 246, 0.1);
+    border-left: 4px solid var(--accent-purple);
+}
+
+.canvas-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.canvas-btn {
+    background: var(--surface-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.canvas-btn:hover {
+    background: var(--primary-dark);
+    border-color: var(--accent-purple);
+}
+
+.canvas-btn.primary {
+    background: var(--gradient-accent);
+    border: none;
+    color: white;
+}
+
+.canvas-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+}
+
+.canvas-select {
+    background: var(--surface-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.canvas-container {
+    display: flex;
+    justify-content: center;
+    margin: 2rem 0;
+    padding: 2rem;
+    background: var(--primary-dark);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+}
+
+#sortCanvas {
+    border: 1px solid var(--border-color);
+    background: var(--secondary-dark);
+}
+
+.canvas-info {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: var(--surface-bg);
+    border-radius: 8px;
+}
+
+.info-item {
+    text-align: center;
+}
+
+.info-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.info-item span:last-child {
+    display: block;
+    color: var(--accent-purple);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.algorithm-explanation {
+    margin: 2rem 0;
+    padding: 2rem;
+    background: var(--surface-bg);
+    border-left: 4px solid var(--accent-purple);
+}
+
+.algorithm-explanation h3 {
+    color: var(--accent-purple);
+    margin-bottom: 1rem;
+}
+
+.algorithm-explanation p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+}

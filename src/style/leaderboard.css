@@ -1,0 +1,97 @@
+@import url("styles.css");
+
+/* ==================== LEADERBOARD PAGE ==================== */
+.leaderboard-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.leaderboard-intro {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(59, 130, 246, 0.1);
+    border-left: 4px solid var(--accent-purple);
+    border-radius: 8px;
+}
+
+.leaderboard-intro p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.leaderboard-item {
+    background: var(--surface-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.leaderboard-item:hover {
+    border-color: var(--accent-purple);
+    transform: translateX(5px);
+}
+
+.leaderboard-rank {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent-purple);
+    min-width: 60px;
+    text-align: center;
+}
+
+.leaderboard-item.top-1 .leaderboard-rank {
+    color: #fbbf24;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+.leaderboard-item.top-2 .leaderboard-rank {
+    color: #94a3b8;
+    text-shadow: 0 0 10px rgba(148, 163, 184, 0.5);
+}
+
+.leaderboard-item.top-3 .leaderboard-rank {
+    color: #fb923c;
+    text-shadow: 0 0 10px rgba(251, 146, 60, 0.5);
+}
+
+.leaderboard-user-info {
+    flex: 1;
+}
+
+.leaderboard-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+}
+
+.leaderboard-progress {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.leaderboard-score {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-purple);
+    min-width: 100px;
+    text-align: right;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}

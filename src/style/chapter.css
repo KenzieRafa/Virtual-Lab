@@ -1,0 +1,150 @@
+@import url("styles.css");
+
+/* ==================== MATERIAL PAGE ==================== */
+.chapter-list {
+    margin: 2rem 0;
+}
+
+.chapter-item {
+    margin-bottom: 3rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 2rem;
+}
+
+.chapter-item:last-child {
+    border-bottom: none;
+}
+
+.chapter-header {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chapter-number {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent-purple);
+    background: rgba(59, 130, 246, 0.1);
+    padding: 0.5rem 1rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.chapter-title-group {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.chapter-title-group h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.video-button {
+    background: var(--gradient-accent);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.video-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+}
+
+.chapter-body {
+    padding-left: 1rem;
+}
+
+.learning-objectives {
+    margin-bottom: 2rem;
+}
+
+.learning-objectives h3,
+.material-content h3 {
+    color: var(--accent-purple);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.material-content h4 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin: 1.5rem 0 0.8rem 0;
+    font-weight: 600;
+}
+
+.chapter-body ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.chapter-body li {
+    margin-bottom: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.chapter-body code {
+    background: var(--primary-dark);
+    color: var(--darker-purple);
+    padding: 0.2rem 0.5rem;
+    font-size: 0.9rem;
+    font-family: 'JetBrains Mono', 'Monaco', monospace;
+}
+
+/* ==================== COMPLETE CHAPTER BUTTON ==================== */
+.chapter-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+}
+
+.complete-chapter-btn {
+    background: var(--gradient-accent);
+    color: white;
+    border: none;
+    padding: 0.9rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.complete-chapter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.complete-chapter-btn.completed {
+    background: linear-gradient(135deg, #22c55e, #4ade80);
+    cursor: default;
+}
+
+.complete-chapter-btn.completed:hover {
+    transform: none;
+}
+
+.check-icon {
+    font-size: 1.2rem;
+}
