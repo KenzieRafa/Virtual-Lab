@@ -33,6 +33,14 @@ export function initSupabase() {
     }
 }
 
+export function getCurrentUser() {
+    return currentUser;
+}
+
+export function setCurrentUser(user) {
+    currentUser = user;
+}
+
 export function updateUIForAuthenticatedUser() {
     const signInBtn = document.getElementById('signInBtn');
     const userProfileHeader = document.getElementById('userProfileHeader');

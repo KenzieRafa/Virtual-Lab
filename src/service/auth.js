@@ -1,4 +1,4 @@
-import { supabaseClient, isSupabaseEnabled, loadUserProfile, currentUser, updateUIForAuthenticatedUser, updateUIForGuestUser } from "./supabase.js";
+import { supabaseClient, isSupabaseEnabled, loadUserProfile, getCurrentUser, setCurrentUser, updateUIForAuthenticatedUser, updateUIForGuestUser, currentUser } from "./supabase.js";
 import { loadUserProgress } from './progress.js';
 import { showWelcomeModal, closeWelcomeModal } from "./welcome.js";
 
@@ -29,7 +29,7 @@ export async function signIn() {
         
         if (error) throw error;
         
-        currentUser = data.user;
+        setCurrentUser(data.user);
         await loadUserProfile();
         showAuthMessage('Sign in berhasil!', 'success');
         
@@ -95,7 +95,7 @@ export async function signOut() {
     if (!isSupabaseEnabled) return;
     try {
         await supabaseClient.auth.signOut();
-        currentUser = null;
+        setCurrentUser(null);
         updateUIForGuestUser();
         showPage('home');
         alert('Sign out berhasil!');
@@ -175,7 +175,8 @@ export async function checkAuthState() {
     try {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (session && session.user) {
-            currentUser = session.user;
+            setCurrentUser(session.user);
+            currentUser = getCurrentUser();
             
             const { data: existingProfile } = await supabaseClient
                 .from('user_profiles')
