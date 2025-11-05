@@ -1,5 +1,5 @@
 import { calculateTotalScore, calculateChapterAverage } from '../service/score.js';
-import { isSupabaseEnabled } from '../service/supabase.js';
+import { isSupabaseEnabled, supabaseClient, currentUser } from '../service/supabase.js';
 
 export async function loadProfilePage() {
     if (!isSupabaseEnabled) {
