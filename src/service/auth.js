@@ -97,7 +97,7 @@ export async function signOut() {
         await supabaseClient.auth.signOut();
         setCurrentUser(null);
         updateUIForGuestUser();
-        showPage('home');
+        window.location.href='/'
         alert('Sign out berhasil!');
     } catch (error) {
         console.error('Sign out error:', error);
