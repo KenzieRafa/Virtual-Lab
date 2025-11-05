@@ -1,4 +1,5 @@
 import { calculateTotalScore } from '../service/score.js';
+import { isSupabaseEnabled } from '../service/supabase.js';
 
 export async function loadLeaderboard() {
     const leaderboardList = document.getElementById('leaderboardList');
