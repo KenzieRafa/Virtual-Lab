@@ -1,4 +1,4 @@
-//import { updateDragDropStats } from "../service/progress";
+import { updateDragDropStats } from "../service/progress";
 
 let draggedElement = null;
 let isDragInitialized = false;
