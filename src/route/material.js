@@ -1,4 +1,5 @@
-import { loadUserProgress, markChapterComplete } from '../service/progress.js';
+import { markChapterComplete } from '../service/progress.js';
+import { loadUserProgress } from '../service/load.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     loadUserProgress();

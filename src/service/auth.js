@@ -1,5 +1,5 @@
 import { supabaseClient, isSupabaseEnabled, loadUserProfile, getCurrentUser, setCurrentUser, updateUIForAuthenticatedUser, updateUIForGuestUser, currentUser } from "./supabase.js";
-import { loadUserProgress } from './progress.js';
+import { loadUserProgress } from "./load.js";
 import { showWelcomeModal, closeWelcomeModal } from "./welcome.js";
 
 export function closeAuthModal() {
