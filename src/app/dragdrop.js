@@ -204,27 +204,34 @@ export function cleanupDragAndDrop() {
 export async function checkDragSolution() {
     const blocks = document.getElementById('solution-area').querySelectorAll('.code-block');
     const feedback = document.getElementById('drag-feedback');
-    
+
     if (blocks.length === 0) {
         feedback.textContent = '❌ Belum ada kode! Drag blok ke area solusi.';
         feedback.className = 'feedback-area show incorrect';
         return;
     }
 
-    const userOrder = Array.from(blocks).map(b => b.dataset.id);
     const problem = dragDropProblems[currentProblemIndex];
+
+    if (blocks.length !== problem.correctOrder.length) {
+        feedback.textContent = `❌ Belum lengkap! Masih ada ${problem.correctOrder.length - blocks.length} blok yang kurang.`;
+        feedback.className = 'feedback-area show incorrect';
+        return;
+    }
+
+    const userOrder = Array.from(blocks).map(b => b.dataset.id);
     const isCorrect = JSON.stringify(userOrder) === JSON.stringify(problem.correctOrder);
-    
+
     if (isCorrect) {
-        feedback.textContent = '🎉 Sempurna! Urutan kode sudah benar!';
+        feedback.textContent = '🎉 Sempurna! Urutan kode sudah benar! Progress tersimpan di Academic Progress.';
         feedback.className = 'feedback-area show correct';
-        
+
         blocks.forEach((block, index) => {
             setTimeout(() => {
                 block.style.animation = 'pulse 0.5s ease';
             }, index * 100);
         });
-        
+
         await updateDragDropStats(true);
     } else {
         feedback.textContent = `❌ Belum tepat. Hint: ${problem.hint}`;
