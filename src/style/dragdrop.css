@@ -23,6 +23,7 @@
     border-radius: 8px;
     background: var(--primary-dark);
     transition: all 0.3s ease;
+    position: relative;
 }
 
 .drag-zone h3 {
@@ -37,11 +38,13 @@
     padding: 1rem 1.5rem;
     margin: 0.8rem 0;
     cursor: move;
+    cursor: grab;
     border-radius: 6px;
     transition: all 0.2s ease;
     user-select: none;
-    touch-action: none;
     -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .code-block code {
@@ -143,19 +146,6 @@
 }
 
 /* ==================== DRAG & DROP TOUCH SUPPORT ==================== */
-.code-block {
-    background: var(--secondary-dark);
-    border: 2px solid var(--border-color);
-    padding: 1rem 1.5rem;
-    margin: 0.8rem 0;
-    cursor: move;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    user-select: none;
-    touch-action: none; 
-    -webkit-user-select: none;
-}
-
 .code-block:active {
     cursor: grabbing;
 }

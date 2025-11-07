@@ -35,6 +35,7 @@ let currentProblemIndex = 0;
 export function handleDragStart(e) {
     draggedElement = this;
     this.classList.add('dragging');
+    console.log('🖱️ Drag started:', this.dataset.id);
 }
 
 export function handleDragEnd(e) {
@@ -159,9 +160,10 @@ export function handleTouchEnd(e) {
 }
 
 export function attachEventListeners(element) {
+    console.log('📌 Attaching listeners to:', element.dataset.id);
     element.addEventListener('dragstart', handleDragStart);
     element.addEventListener('dragend', handleDragEnd);
-    
+
     element.addEventListener('touchstart', handleTouchStart, { passive: false });
     element.addEventListener('touchmove', handleTouchMove, { passive: false });
     element.addEventListener('touchend', handleTouchEnd, { passive: false });
@@ -181,19 +183,24 @@ export function initDragAndDrop() {
         console.log('⚠️ Drag & Drop already initialized, skipping...');
         return;
     }
-    
+
     console.log('✅ Initializing Drag & Drop...');
-    
-    document.querySelectorAll('.code-block').forEach(attachEventListeners);
-    
-    document.querySelectorAll('.drag-zone').forEach(zone => {
+
+    const codeBlocks = document.querySelectorAll('.code-block');
+    console.log(`Found ${codeBlocks.length} code blocks to attach listeners`);
+    codeBlocks.forEach(attachEventListeners);
+
+    const dragZones = document.querySelectorAll('.drag-zone');
+    console.log(`Found ${dragZones.length} drag zones`);
+    dragZones.forEach(zone => {
         zone.addEventListener('dragover', handleDragOver);
         zone.addEventListener('drop', handleDrop);
         zone.addEventListener('dragenter', handleDragEnter);
         zone.addEventListener('dragleave', handleDragLeave);
     });
-    
+
     isDragInitialized = true;
+    console.log('✅ Drag & Drop initialization complete!');
 }
 
 export function cleanupDragAndDrop() {
@@ -297,9 +304,7 @@ export function resetDragExercise() {
         });
     }
 
-    // Re-initialize drag and drop with fresh listeners
-    setTimeout(() => {
-        console.log('🔧 Re-initializing drag & drop...');
-        initDragAndDrop();
-    }, 100);
+    // Re-initialize drag and drop with fresh listeners - removed timeout
+    console.log('🔧 Re-initializing drag & drop...');
+    initDragAndDrop();
 }
