@@ -46,9 +46,12 @@ export function handleDragEnd(e) {
 
 export function handleDragOver(e) {
     e.preventDefault();
+    e.stopPropagation();
+    return false;
 }
 
 export function handleDragEnter(e) {
+    e.preventDefault();
     if (this.classList.contains('drag-zone')) {
         this.classList.add('drag-over');
     }
@@ -62,25 +65,32 @@ export function handleDragLeave(e) {
 
 export function handleDrop(e) {
     e.preventDefault();
-    
-    if (!draggedElement) return;
-    
+    e.stopPropagation();
+
+    console.log('Drop event triggered!', draggedElement);
+
+    if (!draggedElement) {
+        console.log('No dragged element found');
+        return;
+    }
+
     this.classList.remove('drag-over');
-    
+
     const emptyMsg = this.querySelector('.empty-message');
     if (emptyMsg) emptyMsg.remove();
-    
+
     const clone = draggedElement.cloneNode(true);
-    
+
     attachEventListeners(clone);
-    
+
     this.appendChild(clone);
-    
+
     if (draggedElement.parentElement && draggedElement.parentElement.id === 'solution-area') {
         draggedElement.remove();
     }
-    
+
     draggedElement = null;
+    return false;
 }
 
 export function handleTouchStart(e) {
@@ -188,16 +198,18 @@ export function initDragAndDrop() {
 
 export function cleanupDragAndDrop() {
     console.log('🧹 Cleaning up Drag & Drop events...');
-    
+
+    // Remove listeners from code blocks
     document.querySelectorAll('.code-block').forEach(removeEventListeners);
-    
+
+    // Remove listeners from drop zones
     document.querySelectorAll('.drag-zone').forEach(zone => {
         zone.removeEventListener('dragover', handleDragOver);
         zone.removeEventListener('drop', handleDrop);
         zone.removeEventListener('dragenter', handleDragEnter);
         zone.removeEventListener('dragleave', handleDragLeave);
     });
-    
+
     isDragInitialized = false;
 }
 
@@ -242,34 +254,52 @@ export async function checkDragSolution() {
 
 export function resetDragExercise() {
     console.log('🔄 Resetting Drag & Drop exercise...');
-    
+
+    // Clean up existing listeners
     cleanupDragAndDrop();
-    
+
     currentProblemIndex = Math.floor(Math.random() * dragDropProblems.length);
     const problem = dragDropProblems[currentProblemIndex];
-    
-    document.querySelector('#drag-drop .page-title').textContent = `Latihan Drag & Drop - ${problem.title}`;
-    
+
+    // Update title
+    const titleElement = document.querySelector('#drag-drop .page-title');
+    if (titleElement) {
+        titleElement.textContent = `Latihan Drag & Drop - ${problem.title}`;
+    }
+
+    // Reset solution area
     const solutionArea = document.getElementById('solution-area');
-    solutionArea.innerHTML = '<h3>Area Solusi (Drag di sini)</h3><p class="empty-message">Drag blok kode ke sini untuk menyusun program</p>';
-    
-    document.getElementById('drag-feedback').className = 'feedback-area';
-    document.getElementById('drag-feedback').textContent = '';
-    
+    if (solutionArea) {
+        solutionArea.innerHTML = '<h3>Area Solusi (Drag di sini)</h3><p class="empty-message">Drag blok kode ke sini untuk menyusun program</p>';
+    }
+
+    // Reset feedback
+    const feedbackElement = document.getElementById('drag-feedback');
+    if (feedbackElement) {
+        feedbackElement.className = 'feedback-area';
+        feedbackElement.textContent = '';
+    }
+
+    // Reset code blocks area
     const codeBlocksArea = document.getElementById('code-blocks');
-    codeBlocksArea.innerHTML = '<h3>Blok Kode Tersedia</h3>';
-    
-    const shuffled = [...problem.blocks].sort(() => Math.random() - 0.5);
-    shuffled.forEach(item => {
-        const block = document.createElement('div');
-        block.className = 'code-block';
-        block.draggable = true;
-        block.dataset.id = item.id;
-        block.innerHTML = `<code>${item.code}</code>`;
-        codeBlocksArea.appendChild(block);
-    });
-    
+    if (codeBlocksArea) {
+        codeBlocksArea.innerHTML = '<h3>Blok Kode Tersedia</h3>';
+
+        // Shuffle and add blocks
+        const shuffled = [...problem.blocks].sort(() => Math.random() - 0.5);
+        shuffled.forEach(item => {
+            const block = document.createElement('div');
+            block.className = 'code-block';
+            block.draggable = true;
+            block.dataset.id = item.id;
+            block.innerHTML = `<code>${item.code}</code>`;
+            codeBlocksArea.appendChild(block);
+        });
+    }
+
+    // Re-initialize drag and drop with fresh listeners
     setTimeout(() => {
+        console.log('🔧 Re-initializing drag & drop...');
         initDragAndDrop();
     }, 100);
 }

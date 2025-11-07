@@ -1,12 +1,9 @@
-import { resetDragExercise, checkDragSolution, initDragAndDrop } from '../app/dragdrop.js';
+import { resetDragExercise, checkDragSolution } from '../app/dragdrop.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Drag & Drop page loaded');
 
-    // Initialize drag and drop functionality
-    initDragAndDrop();
-
-    // Load first problem
+    // Load first problem (this will also initialize drag & drop)
     resetDragExercise();
 });
 
