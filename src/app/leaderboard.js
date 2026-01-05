@@ -24,7 +24,7 @@ export async function loadLeaderboard() {
             
             return {
                 userId: progress.user_id,
-                name: profile?.display_name || 'User',
+                name: profile?.display_name || progress.full_name || `User ${progress.user_id.substring(0, 4)}`,
                 totalScore: totalScore,
                 completedModules: completedModules
             };
